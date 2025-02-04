@@ -6,13 +6,13 @@ module processing_block #(
   parameter FILTER_VALUE = 116509
 )
 (
-  clk, reset, enable,
+  clk, resetn, enable,
   left_input, middle_input, right_input,
   left_output, middle_output, right_output,
   filter_output
 );
   input wire clk;
-  input wire reset;
+  input wire resetn;
   input wire enable;
   input wire [INPUT_WIDTH-1:0] left_input;
   input wire [INPUT_WIDTH-1:0] middle_input;
@@ -40,7 +40,7 @@ module processing_block #(
     for (i = 0; i < 3; i = i + 1) begin
       for (j = 0; j < 3; j = j + 1) begin
         always @(posedge clk) begin
-          if (reset) begin
+          if (!resetn) begin
             data_reg[i][j] <= 0;
           end else begin
             // Shift data upward by one, bottom comes from input
@@ -71,7 +71,7 @@ module processing_block #(
     for (i = 0; i < 3; i = i + 1) begin
       for (j = 0; j < 3; j = j + 1) begin
         always @(posedge clk) begin
-          if (reset) begin
+          if (!resetn) begin
             filter_multiply_result[i][j] <= 0;
           end else begin
             if (enable) begin
@@ -89,7 +89,7 @@ module processing_block #(
   generate
     for (i = 0; i < 3; i = i + 1) begin
       always @(posedge clk) begin
-        if (reset) begin
+        if (!resetn) begin
           row_accumulate_result[i] <= 0;
         end else begin
           if (enable) begin
@@ -99,7 +99,7 @@ module processing_block #(
       end
     end
     always @(posedge clk) begin
-      if (reset) begin
+      if (!resetn) begin
         filter_accumulate_result <= 0;
       end else begin
         if (enable) begin

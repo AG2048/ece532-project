@@ -19,7 +19,7 @@ module processing_block_tb # (
 
 
     reg clk;
-    reg reset;
+    reg resetn;
     reg enable;
     
     integer i;
@@ -32,7 +32,7 @@ module processing_block_tb # (
         .FILTER_VALUE(FILTER_VALUE)
     ) dut (
         .clk(clk),
-        .reset(reset),
+        .resetn(resetn),
         .enable(enable),
         .left_input(left_input),
         .middle_input(middle_input),
@@ -53,10 +53,10 @@ module processing_block_tb # (
     
     initial
     begin
-        reset = 1'b1;
+        resetn = 1'b0;
         enable = 1'b0;
         #20
-        reset = 1'b0;
+        resetn = 1'b1;
         for (i=0; i < 16; i=i+1)
         begin
             #10 
@@ -66,10 +66,10 @@ module processing_block_tb # (
         end
         #100
 
-        reset = 1'b1;
+        resetn = 1'b0;
         enable = 1'b0;
         #20
-        reset = 1'b0;
+        resetn = 1'b1;
         enable = 1'b1;
         for (i=0; i < 16; i=i+1)
         begin
