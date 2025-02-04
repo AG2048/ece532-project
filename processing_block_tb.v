@@ -4,7 +4,8 @@ module processing_block_tb # (
   parameter INPUT_WIDTH = 8,
   parameter RESULT_WIDTH = 8,
   parameter FILTER_INT_BITS = 0,
-  parameter FILTER_FRACT_BITS = 8
+  parameter FILTER_FRACT_BITS = 20,
+  parameter FILTER_VALUE = 116509
 )();
     reg [INPUT_WIDTH-1:0] left_input;
     reg [INPUT_WIDTH-1:0] middle_input;
@@ -27,7 +28,8 @@ module processing_block_tb # (
         .INPUT_WIDTH(INPUT_WIDTH),
         .RESULT_WIDTH(RESULT_WIDTH),
         .FILTER_INT_BITS(FILTER_INT_BITS),
-        .FILTER_FRACT_BITS(FILTER_FRACT_BITS)
+        .FILTER_FRACT_BITS(FILTER_FRACT_BITS),
+        .FILTER_VALUE(FILTER_VALUE)
     ) dut (
         .clk(clk),
         .reset(reset),
@@ -77,6 +79,7 @@ module processing_block_tb # (
             right_input=i;
         end
         #100
+        enable = 1'b0;
     end
       
 endmodule
