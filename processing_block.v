@@ -1,7 +1,8 @@
 module processing_block #(
   parameter INPUT_WIDTH = 8,
   parameter RESULT_WIDTH = 8,
-  parameter FILTER_VALUES[3][3] = {{1/9, 1/9, 1/9}, {1/9, 1/9, 1/9}, {1/9, 1/9, 1/9}},
+  // Note the filter values are in fixed point format with FILTER_INT_BITS integer bits and FILTER_FRACT_BITS fractional bits
+  parameter FILTER_VALUES[3*3] = {14, 14, 14, 14, 14, 14, 14, 14, 14},
   parameter FILTER_INT_BITS = 0,
   parameter FILTER_FRACT_BITS = 8
 )
@@ -11,10 +12,10 @@ module processing_block #(
   left_output, middle_output, right_output,
   filter_output
 )
-  input clk, reset, enable;
-  input [INPUT_WIDTH-1:0] left_input, middle_input, right_input;
-  output [INPUT_WIDTH-1:0] left_output, middle_output, right_output;
-  output [RESULT_WIDTH-1:0] filter_output;
+  input wire clk, reset, enable;
+  input wire [INPUT_WIDTH-1:0] left_input, middle_input, right_input;
+  output wire [INPUT_WIDTH-1:0] left_output, middle_output, right_output;
+  output wire [RESULT_WIDTH-1:0] filter_output;
 
   // Genvar 9 reg in a 3x3 grid, define 9 reg first with i,j index
   reg [INPUT_WIDTH-1:0] data_reg[3][3];
@@ -58,7 +59,7 @@ module processing_block #(
             filter_multiply_result[i][j] <= 0;
           end else begin
             if (enable) begin
-              filter_multiply_result[i][j] <= data_reg[i][j] * (FILTER_VALUES[i][j] << FILTER_FRACT_BITS);
+              filter_multiply_result[i][j] <= data_reg[i][j] * (FILTER_VALUES[i*3+j]);
             end
           end
         end
