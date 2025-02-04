@@ -2,7 +2,7 @@ module processing_block #(
   parameter INPUT_WIDTH = 8,
   parameter RESULT_WIDTH = 8,
   // Note the filter values are in fixed point format with FILTER_INT_BITS integer bits and FILTER_FRACT_BITS fractional bits
-  parameter FILTER_VALUES[3*3] = {14, 14, 14, 14, 14, 14, 14, 14, 14},
+  localparam [FILTER_INT_BITS+FILTER_FRACT_BITS-1:0] FILTER_VALUES[0:8] = {14, 14, 14, 14, 14, 14, 14, 14, 14},
   parameter FILTER_INT_BITS = 0,
   parameter FILTER_FRACT_BITS = 8
 )
@@ -12,9 +12,15 @@ module processing_block #(
   left_output, middle_output, right_output,
   filter_output
 )
-  input wire clk, reset, enable;
-  input wire [INPUT_WIDTH-1:0] left_input, middle_input, right_input;
-  output wire [INPUT_WIDTH-1:0] left_output, middle_output, right_output;
+  input wire clk;
+  input wire reset;
+  input wire enable;
+  input wire [INPUT_WIDTH-1:0] left_input;
+  input wire [INPUT_WIDTH-1:0] middle_input;
+  input wire [INPUT_WIDTH-1:0] right_input;
+  output wire [INPUT_WIDTH-1:0] left_output;
+  output wire [INPUT_WIDTH-1:0] middle_output;
+  output wire [INPUT_WIDTH-1:0] right_output;
   output wire [RESULT_WIDTH-1:0] filter_output;
 
   // Genvar 9 reg in a 3x3 grid, define 9 reg first with i,j index
