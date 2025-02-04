@@ -69,3 +69,19 @@ Processing Logic:
 - Each register is also input to a multiplier block that multiplies the register value with a constant value (fixed point <8 to 20>-bit representation of 1/9). The result is stored in a register. 
 - The result of multiplication of the same row is summed together and stored in a register.
 - The sum result is summed across the 3 rows, and the output is bit-shifted back to an 8-bit representation (Due to filter being less than 1, the result will be less than max of 8-bits).
+
+## Input Buffer
+This module stores an Nx3 grid of pixels, where N is the number of pixels in a column. Each pixel is represented by 3 8-bit values, one for each RGB channel. (Thus the memory requirement is Nx3x3x8)
+
+The buffer receives input from its bottom right corner, and every time an input is received, the buffer shifts all the values up by one row. The new input is stored in the bottom row, where data from top row is discarded into the Processing block. (Note, the Processing Block's output will be to the bottom middle and bottom left of the buffer)
+
+The bottom right corner buffer may need to have additional delay due to the 3-cycle delay of the processing block.
+
+When the input is complete (last signal), the buffer continues to output one entire column of data to the processing block. From here on out, the input to the buffer should be ignored and ready is set to 0.
+
+Ready may also be set to zero when the pipeline is stalled, where the output buffer is full and not ready to receive new data. (In this case, the processing block's enable will be set to 0, and the input buffer will not write or read data)
+
+## Output Buffer
+This module outputs pixels. It may use a FIFO structure, or it could be just one single register that stores the pixel value. 
+
+Output via AXI-S interface.
