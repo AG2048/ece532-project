@@ -1,8 +1,6 @@
 module processing_block #(
   parameter INPUT_WIDTH = 8,
   parameter RESULT_WIDTH = 8,
-  // Note the filter values are in fixed point format with FILTER_INT_BITS integer bits and FILTER_FRACT_BITS fractional bits
-  localparam [FILTER_INT_BITS+FILTER_FRACT_BITS-1:0] FILTER_VALUES[0:8] = {14, 14, 14, 14, 14, 14, 14, 14, 14},
   parameter FILTER_INT_BITS = 0,
   parameter FILTER_FRACT_BITS = 8
 )
@@ -11,7 +9,7 @@ module processing_block #(
   left_input, middle_input, right_input,
   left_output, middle_output, right_output,
   filter_output
-)
+);
   input wire clk;
   input wire reset;
   input wire enable;
@@ -22,9 +20,20 @@ module processing_block #(
   output wire [INPUT_WIDTH-1:0] middle_output;
   output wire [INPUT_WIDTH-1:0] right_output;
   output wire [RESULT_WIDTH-1:0] filter_output;
-
+  
+  // Note the filter values are in fixed point format with FILTER_INT_BITS integer bits and FILTER_FRACT_BITS fractional bits
+  wire [FILTER_INT_BITS+FILTER_FRACT_BITS-1:0] FILTER_VALUES[0:8];
+  assign FILTER_VALUES[0] = 14;
+  assign FILTER_VALUES[1] = 14;
+  assign FILTER_VALUES[2] = 14;
+  assign FILTER_VALUES[3] = 14;
+  assign FILTER_VALUES[4] = 14;
+  assign FILTER_VALUES[5] = 14;
+  assign FILTER_VALUES[6] = 14;
+  assign FILTER_VALUES[7] = 14;
+  assign FILTER_VALUES[8] = 14;
   // Genvar 9 reg in a 3x3 grid, define 9 reg first with i,j index
-  reg [INPUT_WIDTH-1:0] data_reg[3][3];
+  reg [INPUT_WIDTH-1:0] data_reg[0:2][0:2];
   genvar i, j;
   generate
     for (i = 0; i < 3; i = i + 1) begin
@@ -56,7 +65,7 @@ module processing_block #(
   endgenerate
 
   // Multiply and accumulate
-  reg [FILTER_INT_BITS+FILTER_FRACT_BITS+INPUT_WIDTH-1:0] filter_multiply_result[3][3];
+  reg [FILTER_INT_BITS+FILTER_FRACT_BITS+INPUT_WIDTH-1:0] filter_multiply_result[0:2][0:2];
   generate
     for (i = 0; i < 3; i = i + 1) begin
       for (j = 0; j < 3; j = j + 1) begin
@@ -74,13 +83,13 @@ module processing_block #(
   endgenerate
 
   // Add all the multiplication result
-  reg [FILTER_INT_BITS+FILTER_FRACT_BITS+INPUT_WIDTH-1:0] row_accumulate_result[3];
+  reg [FILTER_INT_BITS+FILTER_FRACT_BITS+INPUT_WIDTH-1:0] row_accumulate_result[0:2];
   reg [RESULT_WIDTH-1:0] filter_accumulate_result;
   generate
     for (i = 0; i < 3; i = i + 1) begin
       always @(posedge clk) begin
         if (reset) begin
-          row_accumulate_result <= 0;
+          row_accumulate_result[i] <= 0;
         end else begin
           if (enable) begin
             row_accumulate_result[i] <= filter_multiply_result[i][0] + filter_multiply_result[i][1] + filter_multiply_result[i][2];
