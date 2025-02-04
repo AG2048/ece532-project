@@ -75,11 +75,19 @@ This module stores an Nx3 grid of pixels, where N is the number of pixels in a c
 
 The buffer receives input from its bottom right corner, and every time an input is received, the buffer shifts all the values up by one row. The new input is stored in the bottom row, where data from top row is discarded into the Processing block. (Note, the Processing Block's output will be to the bottom middle and bottom left of the buffer)
 
-The bottom right corner buffer may need to have additional delay due to the 3-cycle delay of the processing block.
+The bottom right corner buffer may need to have additional delay due to the 3-cycle delay of the processing block. Same might happen for the middle buffer. 
 
 When the input is complete (last signal), the buffer continues to output one entire column of data to the processing block. From here on out, the input to the buffer should be ignored and ready is set to 0.
 
 Ready may also be set to zero when the pipeline is stalled, where the output buffer is full and not ready to receive new data. (In this case, the processing block's enable will be set to 0, and the input buffer will not write or read data)
+
+### Major TODO:
+- tready signal
+- tlast signal
+  - Last is high, buffer will keep pushing anything into buffer for IMAGE_HEIGHT+6 cycles (account for the offset). 
+- tstrb signal
+  - Would have to account for non-aligned data. Might need to separate R, G, B into different modules
+  - Could split into 3 modules, each only deals with one channel, and have a small block that splits AXIS data into 3 bytes. 
 
 ## Output Buffer
 This module outputs pixels. It may use a FIFO structure, or it could be just one single register that stores the pixel value. 
