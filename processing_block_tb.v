@@ -51,7 +51,6 @@ module processing_block_tb # (
     
     initial
     begin
-        #5 // offset so changes happen on negedge
         reset = 1'b1;
         enable = 1'b0;
         #20
