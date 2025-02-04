@@ -2,7 +2,8 @@ module processing_block #(
   parameter INPUT_WIDTH = 8,
   parameter RESULT_WIDTH = 8,
   parameter FILTER_INT_BITS = 0,
-  parameter FILTER_FRACT_BITS = 8
+  parameter FILTER_FRACT_BITS = 20,
+  parameter FILTER_VALUE = 116509
 )
 (
   clk, reset, enable,
@@ -23,15 +24,15 @@ module processing_block #(
   
   // Note the filter values are in fixed point format with FILTER_INT_BITS integer bits and FILTER_FRACT_BITS fractional bits
   wire [FILTER_INT_BITS+FILTER_FRACT_BITS-1:0] FILTER_VALUES[0:8];
-  assign FILTER_VALUES[0] = 14;
-  assign FILTER_VALUES[1] = 14;
-  assign FILTER_VALUES[2] = 14;
-  assign FILTER_VALUES[3] = 14;
-  assign FILTER_VALUES[4] = 14;
-  assign FILTER_VALUES[5] = 14;
-  assign FILTER_VALUES[6] = 14;
-  assign FILTER_VALUES[7] = 14;
-  assign FILTER_VALUES[8] = 14;
+  assign FILTER_VALUES[0] = FILTER_VALUE;
+  assign FILTER_VALUES[1] = FILTER_VALUE;
+  assign FILTER_VALUES[2] = FILTER_VALUE;
+  assign FILTER_VALUES[3] = FILTER_VALUE;
+  assign FILTER_VALUES[4] = FILTER_VALUE;
+  assign FILTER_VALUES[5] = FILTER_VALUE;
+  assign FILTER_VALUES[6] = FILTER_VALUE;
+  assign FILTER_VALUES[7] = FILTER_VALUE;
+  assign FILTER_VALUES[8] = FILTER_VALUE;
   // Genvar 9 reg in a 3x3 grid, define 9 reg first with i,j index
   reg [INPUT_WIDTH-1:0] data_reg[0:2][0:2];
   genvar i, j;
