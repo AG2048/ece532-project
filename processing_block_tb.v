@@ -5,41 +5,33 @@ module processing_block_tb # (
   parameter RESULT_WIDTH = 8,
   parameter FILTER_INT_BITS = 0,
   parameter FILTER_FRACT_BITS = 20,
-  parameter FILTER_VALUE = 116509
+  parameter FILTER_VALUE = 116509,
+
+  parameter BLOCK_SIZE = 3
 )();
-    reg [INPUT_WIDTH-1:0] left_input;
-    reg [INPUT_WIDTH-1:0] middle_input;
-    reg [INPUT_WIDTH-1:0] right_input;
-
-    wire [INPUT_WIDTH-1:0] left_output;
-    wire [INPUT_WIDTH-1:0] middle_output;
-    wire [INPUT_WIDTH-1:0] right_output;
+    reg [INPUT_WIDTH-1:0] inputs[0:BLOCK_SIZE-1];
+    wire [RESULT_WIDTH-1:0] outputs[0:BLOCK_SIZE-1];
     wire [RESULT_WIDTH-1:0] filter_output;
-
-
 
     reg clk;
     reg resetn;
     reg enable;
     
-    integer i;
+    integer i, j;
     
     processing_block #(
         .INPUT_WIDTH(INPUT_WIDTH),
         .RESULT_WIDTH(RESULT_WIDTH),
         .FILTER_INT_BITS(FILTER_INT_BITS),
         .FILTER_FRACT_BITS(FILTER_FRACT_BITS),
-        .FILTER_VALUE(FILTER_VALUE)
+        .FILTER_VALUE(FILTER_VALUE),
+        .BLOCK_SIZE(BLOCK_SIZE)
     ) dut (
         .clk(clk),
         .resetn(resetn),
         .enable(enable),
-        .left_input(left_input),
-        .middle_input(middle_input),
-        .right_input(right_input),
-        .left_output(left_output),
-        .middle_output(middle_output),
-        .right_output(right_output),
+        .inputs(inputs),
+        .outputs(outputs),
         .filter_output(filter_output)
     );
     
@@ -57,12 +49,12 @@ module processing_block_tb # (
         enable = 1'b0;
         #20
         resetn = 1'b1;
-        for (i=0; i < 16; i=i+1)
+        for (i=0; i < (1<<INPUT_WIDTH)-BLOCK_SIZE; i=i+BLOCK_SIZE)
         begin
             #10 
-            left_input=i;
-            middle_input=i;
-            right_input=i;
+            for (j=0; j < BLOCK_SIZE; j=j+1) begin
+                inputs[j] = i+j;
+            end
         end
         #100
 
@@ -70,14 +62,16 @@ module processing_block_tb # (
         enable = 1'b0;
         #20
         resetn = 1'b1;
-        enable = 1'b1;
-        for (i=0; i < 16; i=i+1)
+        for (i=0; i < (1<<INPUT_WIDTH)-BLOCK_SIZE; i=i+BLOCK_SIZE)
         begin
             #10 
-            left_input=i;
-            middle_input=i;
-            right_input=i;
+            enable = 1'b1;
+            for (j=0; j < BLOCK_SIZE; j=j+1) begin
+                inputs[j] = i+j;
+            end
         end
+        #10
+        enable = 1'b0;
         #100
         enable = 1'b0;
     end

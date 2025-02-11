@@ -1,62 +1,48 @@
 module processing_block #(
   parameter INPUT_WIDTH = 8,
   parameter RESULT_WIDTH = 8,
+  parameter BLOCK_SIZE = 3,
+  parameter ROW_ADDITION_EXTRA_BITS = $clog2(BLOCK_SIZE), // Extra bits for row addition
   parameter FILTER_INT_BITS = 0,
   parameter FILTER_FRACT_BITS = 20,
-  parameter FILTER_VALUE = 116509
+  parameter FILTER_VALUE = 116509 // 1/9 << 20 + 1
 )
 (
   clk, resetn, enable,
-  left_input, middle_input, right_input,
-  left_output, middle_output, right_output,
+  inputs, outputs
   filter_output
 );
   input wire clk;
   input wire resetn;
   input wire enable;
-  input wire [INPUT_WIDTH-1:0] left_input;
-  input wire [INPUT_WIDTH-1:0] middle_input;
-  input wire [INPUT_WIDTH-1:0] right_input;
-  output wire [INPUT_WIDTH-1:0] left_output;
-  output wire [INPUT_WIDTH-1:0] middle_output;
-  output wire [INPUT_WIDTH-1:0] right_output;
+
+  input wire [INPUT_WIDTH-1:0] inputs[0:BLOCK_SIZE-1];
+  output wire [INPUT_WIDTH-1:0] outputs[0:BLOCK_SIZE-1];
   output wire [RESULT_WIDTH-1:0] filter_output;
   
   // Note the filter values are in fixed point format with FILTER_INT_BITS integer bits and FILTER_FRACT_BITS fractional bits
-  wire [FILTER_INT_BITS+FILTER_FRACT_BITS-1:0] FILTER_VALUES[0:8];
-  assign FILTER_VALUES[0] = FILTER_VALUE;
-  assign FILTER_VALUES[1] = FILTER_VALUE;
-  assign FILTER_VALUES[2] = FILTER_VALUE;
-  assign FILTER_VALUES[3] = FILTER_VALUE;
-  assign FILTER_VALUES[4] = FILTER_VALUE;
-  assign FILTER_VALUES[5] = FILTER_VALUE;
-  assign FILTER_VALUES[6] = FILTER_VALUE;
-  assign FILTER_VALUES[7] = FILTER_VALUE;
-  assign FILTER_VALUES[8] = FILTER_VALUE;
-  // Genvar 9 reg in a 3x3 grid, define 9 reg first with i,j index
-  reg [INPUT_WIDTH-1:0] data_reg[0:2][0:2];
+  wire [FILTER_INT_BITS+FILTER_FRACT_BITS-1:0] FILTER_VALUES[0:BLOCK_SIZE*BLOCK_SIZE-1];
+  for (genvar i = 0; i < BLOCK_SIZE*BLOCK_SIZE; i = i + 1) begin
+    assign FILTER_VALUES[i] = FILTER_VALUE;
+  end
+  // Genvar 9 reg in a BLOCK_SIZExBLOCK_SIZE grid, define 9 reg first with i,j index
+  reg [INPUT_WIDTH-1:0] data_reg[0:BLOCK_SIZE-1][0:BLOCK_SIZE-1];
   genvar i, j;
   generate
-    for (i = 0; i < 3; i = i + 1) begin
-      for (j = 0; j < 3; j = j + 1) begin
+    for (i = 0; i < BLOCK_SIZE; i = i + 1) begin
+      for (j = 0; j < BLOCK_SIZE; j = j + 1) begin
         always @(posedge clk) begin
           if (!resetn) begin
             data_reg[i][j] <= 0;
           end else begin
             // Shift data upward by one, bottom comes from input
             if (enable) begin
-              if (i != 2) begin
+              if (i != BLOCK_SIZE-1) begin
                 // Top row and middle row
                 data_reg[i][j] <= data_reg[i+1][j];
               end else begin
                 // Bottom row
-                if (j == 0) begin
-                  data_reg[i][j] <= left_input;
-                end else if (j == 1) begin
-                  data_reg[i][j] <= middle_input;
-                end else begin
-                  data_reg[i][j] <= right_input;
-                end
+                data_reg[i][j] <= inputs[j];
               end
             end
           end
@@ -66,16 +52,16 @@ module processing_block #(
   endgenerate
 
   // Multiply and accumulate
-  reg [FILTER_INT_BITS+FILTER_FRACT_BITS+INPUT_WIDTH-1:0] filter_multiply_result[0:2][0:2];
+  reg [FILTER_INT_BITS+FILTER_FRACT_BITS+INPUT_WIDTH-1:0] filter_multiply_result[0:BLOCK_SIZE-1][0:BLOCK_SIZE-1];
   generate
-    for (i = 0; i < 3; i = i + 1) begin
-      for (j = 0; j < 3; j = j + 1) begin
+    for (i = 0; i < BLOCK_SIZE; i = i + 1) begin
+      for (j = 0; j < BLOCK_SIZE; j = j + 1) begin
         always @(posedge clk) begin
           if (!resetn) begin
             filter_multiply_result[i][j] <= 0;
           end else begin
             if (enable) begin
-              filter_multiply_result[i][j] <= data_reg[i][j] * (FILTER_VALUES[i*3+j]);
+              filter_multiply_result[i][j] <= data_reg[i][j] * (FILTER_VALUES[i*BLOCK_SIZE+j]);
             end
           end
         end
@@ -84,16 +70,25 @@ module processing_block #(
   endgenerate
 
   // Add all the multiplication result
-  reg [FILTER_INT_BITS+FILTER_FRACT_BITS+INPUT_WIDTH-1:0] row_accumulate_result[0:2];
+  reg [FILTER_INT_BITS+FILTER_FRACT_BITS+INPUT_WIDTH+ROW_ADDITION_EXTRA_BITS-1:0] row_accumulate_result[0:BLOCK_SIZE-1];
+  // Filter result has width of predefined value, ASSUMING wouldn't overflow
   reg [RESULT_WIDTH-1:0] filter_accumulate_result;
   generate
-    for (i = 0; i < 3; i = i + 1) begin
+    for (i = 0; i < BLOCK_SIZE; i = i + 1) begin
       always @(posedge clk) begin
         if (!resetn) begin
           row_accumulate_result[i] <= 0;
         end else begin
           if (enable) begin
-            row_accumulate_result[i] <= filter_multiply_result[i][0] + filter_multiply_result[i][1] + filter_multiply_result[i][2];
+            // Compute the sum over j (columns)
+            integer j;
+            reg [FILTER_INT_BITS+FILTER_FRACT_BITS+INPUT_WIDTH-1:0] sum;
+            sum = 0;
+            for (j = 0; j < BLOCK_SIZE; j = j + 1) begin
+              sum = sum + filter_multiply_result[i][j];
+            end
+
+            row_accumulate_result[i] <= sum;
           end
         end
       end
@@ -103,15 +98,20 @@ module processing_block #(
         filter_accumulate_result <= 0;
       end else begin
         if (enable) begin
-          filter_accumulate_result <= (row_accumulate_result[0] + row_accumulate_result[1] + row_accumulate_result[2]) >> FILTER_FRACT_BITS;
+          // Compute the sum over i (rows)
+          integer i;
+          reg [FILTER_INT_BITS+FILTER_FRACT_BITS+INPUT_WIDTH+ROW_ADDITION_EXTRA_BITS-1:0] sum;
+          sum = 0;
+          for (i = 0; i < BLOCK_SIZE; i = i + 1) begin
+            sum = sum + row_accumulate_result[i];
+          end
+          filter_accumulate_result <= sum >> FILTER_FRACT_BITS;
         end
       end
     end
   endgenerate
 
-  // Output
-  assign left_output = data_reg[0][0];
-  assign middle_output = data_reg[0][1];
-  assign right_output = data_reg[0][2];
+  // Output output[j] = data_reg[0][j], comb logic
+  assign outputs = data_reg[0];
   assign filter_output = filter_accumulate_result;
 endmodule
