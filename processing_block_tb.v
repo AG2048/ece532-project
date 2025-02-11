@@ -9,7 +9,7 @@ module processing_block_tb # (
 
   parameter BLOCK_SIZE = 3
 )();
-    reg [INPUT_WIDTH * BLOCK_SIZE-1:0] inputs;
+    wire [INPUT_WIDTH * BLOCK_SIZE-1:0] inputs;
     wire [INPUT_WIDTH * BLOCK_SIZE-1:0] outputs;
     wire [RESULT_WIDTH-1:0] filter_output;
 
