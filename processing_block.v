@@ -39,7 +39,7 @@ module processing_block #(
             if (enable) begin
               if (data_reg_i != BLOCK_SIZE-1) begin
                 // Top row and middle row
-                data_reg[data_reg_i][data_reg_j] <= data_reg[i+1][data_reg_j];
+                data_reg[data_reg_i][data_reg_j] <= data_reg[data_reg_i+1][data_reg_j];
               end else begin
                 // Bottom row (data_reg_jth input from inputs)
                 data_reg[data_reg_i][data_reg_j] <= inputs[(data_reg_j+1) * INPUT_WIDTH - 1:data_reg_j * INPUT_WIDTH];
@@ -86,7 +86,7 @@ module processing_block #(
             // Compute the sum over j (columns)
             sum_row = 0;
             for (col_index = 0; col_index < BLOCK_SIZE; col_index = col_index + 1) begin
-              sum_row = sum_row + filter_multiply_result[i][col_index];
+              sum_row = sum_row + filter_multiply_result[accum_i][col_index];
             end
 
             row_accumulate_result[accum_i] <= sum_row;
