@@ -9,7 +9,7 @@ module processing_block #(
 )
 (
   clk, resetn, enable,
-  inputs, outputs
+  inputs, outputs,
   filter_output
 );
   input wire clk;
@@ -73,6 +73,7 @@ module processing_block #(
   reg [FILTER_INT_BITS+FILTER_FRACT_BITS+INPUT_WIDTH+ROW_ADDITION_EXTRA_BITS-1:0] row_accumulate_result[0:BLOCK_SIZE-1];
   // Filter result has width of predefined value, ASSUMING wouldn't overflow
   reg [RESULT_WIDTH-1:0] filter_accumulate_result;
+  integer col_index, sum_col, sum_row, row_index;
   generate
     for (i = 0; i < BLOCK_SIZE; i = i + 1) begin
       always @(posedge clk) begin
@@ -81,14 +82,12 @@ module processing_block #(
         end else begin
           if (enable) begin
             // Compute the sum over j (columns)
-            integer j;
-            reg [FILTER_INT_BITS+FILTER_FRACT_BITS+INPUT_WIDTH-1:0] sum;
-            sum = 0;
-            for (j = 0; j < BLOCK_SIZE; j = j + 1) begin
-              sum = sum + filter_multiply_result[i][j];
+            sum_row = 0;
+            for (col_index = 0; col_index < BLOCK_SIZE; col_index = col_index + 1) begin
+              sum_row = sum_row + filter_multiply_result[i][col_index];
             end
 
-            row_accumulate_result[i] <= sum;
+            row_accumulate_result[i] <= sum_row;
           end
         end
       end
@@ -99,19 +98,22 @@ module processing_block #(
       end else begin
         if (enable) begin
           // Compute the sum over i (rows)
-          integer i;
-          reg [FILTER_INT_BITS+FILTER_FRACT_BITS+INPUT_WIDTH+ROW_ADDITION_EXTRA_BITS-1:0] sum;
-          sum = 0;
-          for (i = 0; i < BLOCK_SIZE; i = i + 1) begin
-            sum = sum + row_accumulate_result[i];
+          sum_col = 0;
+          for (row_index = 0; row_index < BLOCK_SIZE; row_index = row_index + 1) begin
+            sum_col = sum_col + row_accumulate_result[row_index];
           end
-          filter_accumulate_result <= sum >> FILTER_FRACT_BITS;
+          filter_accumulate_result <= sum_col >> FILTER_FRACT_BITS;
         end
       end
     end
   endgenerate
 
   // Output output[j] = data_reg[0][j], comb logic
-  assign outputs = data_reg[0];
+  genvar output_col_index;
+  generate
+      for(output_col_index = 0; output_col_index < BLOCK_SIZE; output_col_index = output_col_index+1) begin 
+          assign outputs[output_col_index] = data_reg[0][output_col_index]; 
+      end
+  endgenerate
   assign filter_output = filter_accumulate_result;
 endmodule
