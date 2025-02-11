@@ -82,8 +82,8 @@ module processing_block_tb # (
                 inputs_display[j] = i+j;
             end
         end
-        #10
-        enable = 1'b0;
+        #100
+        enable = 1'b1;
         #100
         resetn = 1'b0;
         enable = 1'b0;
@@ -97,8 +97,23 @@ module processing_block_tb # (
             inputs_display[1] = 0;
             inputs_display[2] = 0;
         end
-        #10
+        #100
+        enable = 1'b1;
+        #100
+        resetn = 1'b0;
         enable = 1'b0;
+        #20
+        resetn = 1'b1;
+        for (i=0; i < 10; i=i+1)
+        begin
+            #10 
+            enable = 1'b1;
+            inputs_display[0] = 255;
+            inputs_display[1] = 255;
+            inputs_display[2] = 255;
+        end
+        #100
+        enable = 1'b1;
     end
       
 endmodule
