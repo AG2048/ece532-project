@@ -1,7 +1,11 @@
 module input_buffer #(
   parameter DATA_WIDTH = 8,
+  parameter BLOCK_SIZE = 3,
   parameter C_AXIS_TDATA_WIDTH = 32,
-  parameter IMAGE_HEIGHT = 480
+
+  // These two parameters should be the same, could change for "advanced" features
+  parameter BUFFER_HEIGHT = 480, // How many rows to buffer
+  parameter INPUT_HEIGHT = 480 // How many rows to input (used for the BLOCK_SIZE delay after INPUT_HEIGHT inputs)
 )
 (
   // AXI-Stream interface
@@ -10,66 +14,63 @@ module input_buffer #(
   tstrb, tdata,
 
   // Internal signals
-  left_out_R, middle_out_R, right_out_R,
-  left_in_R, middle_in_R,
-  left_out_G, middle_out_G, right_out_G,
-  left_in_G, middle_in_G,
-  left_out_B, middle_out_B, right_out_B,
-  left_in_B, middle_in_B
+  // inputs [(BLOCK_SIZE-1) * DATA_WIDTH - 1:0] (does not include the last col)
+  // outputs [BLOCK_SIZE * DATA_WIDTH - 1:0] (includes the last col)
+  inputs_R, outputs_R,
+  inputs_G, outputs_G,
+  inputs_B, outputs_B,
+
+  // Output module signals (!(output_module_tvalid && !output_module_tready))
+  output_has_back_pressure // If the output module has back pressure, 1 means we shouldn't have any data flow
 );
   // AXI-Stream interface
   input wire aclk;
   input wire aresetn;
   output wire tready;
   input wire tvalid;
-  input wire [(C_AXIS_TDATA_WIDTH/8)-1:0] tstrb;
+  input wire [(C_AXIS_TDATA_WIDTH/8)-1:0] tstrb; // Not used
   input wire [C_AXIS_TDATA_WIDTH-1:0] tdata;
 
   // I/O signals for the processing block
-  output wire [DATA_WIDTH-1:0] left_out_R;
-  output wire [DATA_WIDTH-1:0] middle_out_R;
-  output wire [DATA_WIDTH-1:0] right_out_R;
+  input wire [(BLOCK_SIZE-1)*DATA_WIDTH-1:0] inputs_R;
+  output wire [BLOCK_SIZE*DATA_WIDTH-1:0] outputs_R;
 
-  input wire [DATA_WIDTH-1:0] left_in_R;
-  input wire [DATA_WIDTH-1:0] middle_in_R;
+  input wire [(BLOCK_SIZE-1)*DATA_WIDTH-1:0] inputs_G;
+  output wire [BLOCK_SIZE*DATA_WIDTH-1:0] outputs_G;
 
-  output wire [DATA_WIDTH-1:0] left_out_G;
-  output wire [DATA_WIDTH-1:0] middle_out_G;
-  output wire [DATA_WIDTH-1:0] right_out_G;
+  input wire [(BLOCK_SIZE-1)*DATA_WIDTH-1:0] inputs_B;
+  output wire [BLOCK_SIZE*DATA_WIDTH-1:0] outputs_B;
 
-  input wire [DATA_WIDTH-1:0] left_in_G;
-  input wire [DATA_WIDTH-1:0] middle_in_G;
-
-  output wire [DATA_WIDTH-1:0] left_out_B;
-  output wire [DATA_WIDTH-1:0] middle_out_B;
-  output wire [DATA_WIDTH-1:0] right_out_B;
-
-  input wire [DATA_WIDTH-1:0] left_in_B;
-  input wire [DATA_WIDTH-1:0] middle_in_B;
-
-  // Define the memory buffer (3 x IMAGE_HEIGHT x 3) of [DATA_WIDTH-1:0]
+  // Define the memory buffer (3 x IMAGE_HEIGHT x BLOCK_SIZE) of [DATA_WIDTH-1:0]
   // [RGB][Y][X]
-  reg [DATA_WIDTH-1:0] data_reg[0:2][0:IMAGE_HEIGHT-1][0:2];
+  reg [DATA_WIDTH-1:0] data_reg[0:2][0:BUFFER_HEIGHT-1][0:BLOCK_SIZE-1];
   // Write enable signal - tvalid and tready
   wire write_enable;
   assign write_enable = tvalid && tready;
-  // The two registers are to delay input data by the delay from processing block
-  // [RGB][Y]
-  reg [DATA_WIDTH-1:0] middle_buffer[0:2][0:2];
-  reg [DATA_WIDTH-1:0] right_buffer[0:2][0:5];
+
+  // tready: when there are no back pressure AND counter 1 is not 0
+  // Backpressure: when the output buffer has a valid value, but ready is not asserted
+  // Explanation: If output buffer isn't valid, then we won't worry about "deleting" a valid output
+  //              If output buffer is valid, but ready not asserted, meaning any data flow risks "deleting" a valid output
+  //              If counter 1 is 0, then we have to delay the input by "BLOCK_SIZE" cycles
+  // assign tready = !output_has_back_pressure && (counter_1 != 0);
+
+  // Counter 1: Counts down from INPUT_HEIGHT to 0 (if count == 0, then input zero to buffer)
+  // Counter 2: Counts down from BLOCK_SIZE-1 to 0 (if count == 0, then reset counter 1)
 
   // Output signals come from the top row of the data_reg
-  assign left_out_R = data_reg[0][0][0];
-  assign middle_out_R = data_reg[0][0][1];
-  assign right_out_R = data_reg[0][0][2];
+  genvar i_o_assign_channel, i_o_assign_j
+  generate
+    for (i_o_assign_channel = 0; i_o_assign_channel < 3; i_o_assign_channel = i_o_assign_channel + 1) begin
+      for (i_o_assign_j = 0; i_o_assign_j < BLOCK_SIZE; i_o_assign_j = i_o_assign_j + 1) begin
+        assign outputs_R[(i_o_assign_j+1)*DATA_WIDTH-1:i_o_assign_j*DATA_WIDTH] = data_reg[0][0][i_o_assign_j];
+        assign outputs_G[(i_o_assign_j+1)*DATA_WIDTH-1:i_o_assign_j*DATA_WIDTH] = data_reg[1][0][i_o_assign_j];
+        assign outputs_B[(i_o_assign_j+1)*DATA_WIDTH-1:i_o_assign_j*DATA_WIDTH] = data_reg[2][0][i_o_assign_j];
+      end
+    end
+  endgenerate
 
-  assign left_out_G = data_reg[1][0][0];
-  assign middle_out_G = data_reg[1][0][1];
-  assign right_out_G = data_reg[1][0][2];
-  
-  assign left_out_B = data_reg[2][0][0];
-  assign middle_out_B = data_reg[2][0][1];
-  assign right_out_B = data_reg[2][0][2];
+  // TODO
 
   // Generate the data shift register
   genvar channel, i, j;
