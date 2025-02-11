@@ -9,8 +9,8 @@ module processing_block_tb # (
 
   parameter BLOCK_SIZE = 3
 )();
-    reg [INPUT_WIDTH-1:0] inputs[0:BLOCK_SIZE-1];
-    wire [RESULT_WIDTH-1:0] outputs[0:BLOCK_SIZE-1];
+    reg [INPUT_WIDTH * BLOCK_SIZE-1:0] inputs;
+    wire [INPUT_WIDTH * BLOCK_SIZE-1:0] outputs;
     wire [RESULT_WIDTH-1:0] filter_output;
 
     reg clk;
@@ -34,6 +34,18 @@ module processing_block_tb # (
         .outputs(outputs),
         .filter_output(filter_output)
     );
+
+    // Helpful output display
+    reg [INPUT_WIDTH-1:0] inputs_display[BLOCK_SIZE-1:0];
+    wire [RESULT_WIDTH-1:0] outputs_display[BLOCK_SIZE-1:0];
+    genvar unpacking_index;
+    generate
+        for (unpacking_index = 0; unpacking_index < BLOCK_SIZE; unpacking_index = unpacking_index + 1) begin
+            assign inputs[(unpacking_index+1)*INPUT_WIDTH-1:unpacking_index*INPUT_WIDTH] = inputs_display[unpacking_index];
+            assign outputs_display[unpacking_index] = outputs[(unpacking_index+1)*RESULT_WIDTH-1:unpacking_index*RESULT_WIDTH];
+        end
+    endgenerate
+
     
     // Generate a clock (period 10 ns)
     initial begin
@@ -53,7 +65,7 @@ module processing_block_tb # (
         begin
             #10 
             for (j=0; j < BLOCK_SIZE; j=j+1) begin
-                inputs[j] = i+j;
+                inputs_display[j] = i+j;
             end
         end
         #100
@@ -67,7 +79,7 @@ module processing_block_tb # (
             #10 
             enable = 1'b1;
             for (j=0; j < BLOCK_SIZE; j=j+1) begin
-                inputs[j] = i+j;
+                inputs_display[j] = i+j;
             end
         end
         #10

@@ -16,8 +16,8 @@ module processing_block #(
   input wire resetn;
   input wire enable;
 
-  input wire [INPUT_WIDTH-1:0] inputs[0:BLOCK_SIZE-1];
-  output wire [INPUT_WIDTH-1:0] outputs[0:BLOCK_SIZE-1];
+  input wire [(INPUT_WIDTH * BLOCK_SIZE) - 1:0] inputs;
+  output wire [(INPUT_WIDTH * BLOCK_SIZE) - 1:0] outputs;
   output wire [RESULT_WIDTH-1:0] filter_output;
   
   // Note the filter values are in fixed point format with FILTER_INT_BITS integer bits and FILTER_FRACT_BITS fractional bits
@@ -41,8 +41,8 @@ module processing_block #(
                 // Top row and middle row
                 data_reg[i][j] <= data_reg[i+1][j];
               end else begin
-                // Bottom row
-                data_reg[i][j] <= inputs[j];
+                // Bottom row (jth input from inputs)
+                data_reg[i][j] <= inputs[(j+1) * INPUT_WIDTH - 1:j * INPUT_WIDTH];
               end
             end
           end
@@ -112,7 +112,7 @@ module processing_block #(
   genvar output_col_index;
   generate
       for(output_col_index = 0; output_col_index < BLOCK_SIZE; output_col_index = output_col_index+1) begin 
-          assign outputs[output_col_index] = data_reg[0][output_col_index]; 
+          assign outputs[(output_col_index+1) * INPUT_WIDTH - 1:output_col_index * INPUT_WIDTH] = data_reg[0][output_col_index];
       end
   endgenerate
   assign filter_output = filter_accumulate_result;
