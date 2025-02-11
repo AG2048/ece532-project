@@ -27,22 +27,22 @@ module processing_block #(
   end
   // Genvar 9 reg in a BLOCK_SIZExBLOCK_SIZE grid, define 9 reg first with i,j index
   reg [INPUT_WIDTH-1:0] data_reg[0:BLOCK_SIZE-1][0:BLOCK_SIZE-1];
-  genvar i, j;
+  genvar data_reg_i, data_reg_j;
   generate
-    for (i = 0; i < BLOCK_SIZE; i = i + 1) begin
-      for (j = 0; j < BLOCK_SIZE; j = j + 1) begin
+    for (data_reg_i = 0; data_reg_i < BLOCK_SIZE; data_reg_i = data_reg_i + 1) begin
+      for (data_reg_j = 0; data_reg_j < BLOCK_SIZE; data_reg_j = data_reg_j + 1) begin
         always @(posedge clk) begin
           if (!resetn) begin
-            data_reg[i][j] <= 0;
+            data_reg[data_reg_i][data_reg_j] <= 0;
           end else begin
             // Shift data upward by one, bottom comes from input
             if (enable) begin
-              if (i != BLOCK_SIZE-1) begin
+              if (data_reg_i != BLOCK_SIZE-1) begin
                 // Top row and middle row
-                data_reg[i][j] <= data_reg[i+1][j];
+                data_reg[data_reg_i][data_reg_j] <= data_reg[i+1][data_reg_j];
               end else begin
-                // Bottom row (jth input from inputs)
-                data_reg[i][j] <= inputs[(j+1) * INPUT_WIDTH - 1:j * INPUT_WIDTH];
+                // Bottom row (data_reg_jth input from inputs)
+                data_reg[data_reg_i][data_reg_j] <= inputs[(data_reg_j+1) * INPUT_WIDTH - 1:data_reg_j * INPUT_WIDTH];
               end
             end
           end
@@ -53,15 +53,16 @@ module processing_block #(
 
   // Multiply and accumulate
   reg [FILTER_INT_BITS+FILTER_FRACT_BITS+INPUT_WIDTH-1:0] filter_multiply_result[0:BLOCK_SIZE-1][0:BLOCK_SIZE-1];
+  genvar multiply_i, multiply_j;
   generate
-    for (i = 0; i < BLOCK_SIZE; i = i + 1) begin
-      for (j = 0; j < BLOCK_SIZE; j = j + 1) begin
+    for (multiply_i = 0; multiply_i < BLOCK_SIZE; multiply_i = multiply_i + 1) begin
+      for (multiply_j = 0; multiply_j < BLOCK_SIZE; multiply_j = multiply_j + 1) begin
         always @(posedge clk) begin
           if (!resetn) begin
-            filter_multiply_result[i][j] <= 0;
+            filter_multiply_result[multiply_i][multiply_j] <= 0;
           end else begin
             if (enable) begin
-              filter_multiply_result[i][j] <= data_reg[i][j] * (FILTER_VALUES[i*BLOCK_SIZE+j]);
+              filter_multiply_result[multiply_i][multiply_j] <= data_reg[multiply_i][multiply_j] * (FILTER_VALUES[multiply_i*BLOCK_SIZE+multiply_j]);
             end
           end
         end
@@ -74,11 +75,12 @@ module processing_block #(
   // Filter result has width of predefined value, ASSUMING wouldn't overflow
   reg [RESULT_WIDTH-1:0] filter_accumulate_result;
   integer col_index, sum_col, sum_row, row_index;
+  genvar accum_i;
   generate
-    for (i = 0; i < BLOCK_SIZE; i = i + 1) begin
+    for (accum_i = 0; accum_i < BLOCK_SIZE; accum_i = accum_i + 1) begin
       always @(posedge clk) begin
         if (!resetn) begin
-          row_accumulate_result[i] <= 0;
+          row_accumulate_result[accum_i] <= 0;
         end else begin
           if (enable) begin
             // Compute the sum over j (columns)
@@ -87,7 +89,7 @@ module processing_block #(
               sum_row = sum_row + filter_multiply_result[i][col_index];
             end
 
-            row_accumulate_result[i] <= sum_row;
+            row_accumulate_result[accum_i] <= sum_row;
           end
         end
       end
