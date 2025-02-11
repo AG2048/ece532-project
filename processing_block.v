@@ -5,7 +5,7 @@ module processing_block #(
   parameter ROW_ADDITION_EXTRA_BITS = $clog2(BLOCK_SIZE), // Extra bits for row addition
   parameter FILTER_INT_BITS = 0,
   parameter FILTER_FRACT_BITS = 20,
-  parameter FILTER_VALUE = 116509 // 1/9 << 20 + 1
+  parameter FILTER_VALUE = ((1<<FILTER_FRACT_BITS)/BLOCK_SIZE/BLOCK_SIZE)+1 // 1/9 << 20 + 1
 )
 (
   clk, resetn, enable,

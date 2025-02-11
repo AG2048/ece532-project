@@ -5,9 +5,9 @@ module processing_block_tb # (
   parameter RESULT_WIDTH = 8,
   parameter FILTER_INT_BITS = 0,
   parameter FILTER_FRACT_BITS = 20,
-  parameter FILTER_VALUE = 116509,
+  parameter FILTER_VALUE = ((1<<FILTER_FRACT_BITS)/BLOCK_SIZE/BLOCK_SIZE)+1,
 
-  parameter BLOCK_SIZE = 3
+  parameter BLOCK_SIZE = 5
 )();
     wire [INPUT_WIDTH * BLOCK_SIZE-1:0] inputs;
     wire [INPUT_WIDTH * BLOCK_SIZE-1:0] outputs;
@@ -93,9 +93,10 @@ module processing_block_tb # (
         begin
             #10 
             enable = 1'b1;
-            inputs_display[0] = i/3;
-            inputs_display[1] = 0;
-            inputs_display[2] = 0;
+            inputs_display[0] = i/BLOCK_SIZE;
+            for (j=1; j < BLOCK_SIZE; j=j+1) begin
+                inputs_display[j] = 0;
+            end
         end
         #100
         enable = 1'b1;
@@ -108,9 +109,9 @@ module processing_block_tb # (
         begin
             #10 
             enable = 1'b1;
-            inputs_display[0] = 255;
-            inputs_display[1] = 255;
-            inputs_display[2] = 255;
+            for (j=0; j < BLOCK_SIZE; j=j+1) begin
+                inputs_display[j] = (1<<INPUT_WIDTH) - 1;
+            end
         end
         #100
         enable = 1'b1;
