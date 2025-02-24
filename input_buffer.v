@@ -16,6 +16,7 @@ module input_buffer #(
   // Internal signals
   // inputs [(BLOCK_SIZE-1) * DATA_WIDTH - 1:0] (does not include the last col)
   // outputs [BLOCK_SIZE * DATA_WIDTH - 1:0] (includes the last col)
+  // Input is from processing block, output is to block
   inputs_R, outputs_R,
   inputs_G, outputs_G,
   inputs_B, outputs_B,
@@ -48,15 +49,22 @@ module input_buffer #(
   wire write_enable;
   assign write_enable = tvalid && tready;
 
+  // Define counters (calculate bit width of INPUT_HEIGHT)
+  reg [$clog2(INPUT_HEIGHT)-1:0] counter_input;
+  // Counter for padding
+  reg [$clog2(BLOCK_SIZE)-1:0] counter_padding;
+  
   // tready: when there are no back pressure AND counter 1 is not 0
+  assign tready = !output_has_back_pressure && (counter_input != 0);
+
   // Backpressure: when the output buffer has a valid value, but ready is not asserted
   // Explanation: If output buffer isn't valid, then we won't worry about "deleting" a valid output
   //              If output buffer is valid, but ready not asserted, meaning any data flow risks "deleting" a valid output
   //              If counter 1 is 0, then we have to delay the input by "BLOCK_SIZE" cycles
   // assign tready = !output_has_back_pressure && (counter_1 != 0);
 
-  // Counter 1: Counts down from INPUT_HEIGHT to 0 (if count == 0, then input zero to buffer)
-  // Counter 2: Counts down from BLOCK_SIZE-1 to 0 (if count == 0, then reset counter 1)
+  // Counter Input: Counts down from INPUT_HEIGHT to 0 (if count == 0, then input zero to buffer)
+  // Counter Padding: Counts down from BLOCK_SIZE-1 to 0 (if count == 0, then reset counter 1)
 
   // Output signals come from the top row of the data_reg
   genvar i_o_assign_channel, i_o_assign_j
@@ -70,7 +78,29 @@ module input_buffer #(
     end
   endgenerate
 
-  // TODO
+  // Counters logic: 
+  always @(posedge aclk) begin
+    if (!aresetn) begin
+      // Reset all counters
+      counter_input <= INPUT_HEIGHT;
+      counter_padding <= BLOCK_SIZE-1;
+    end else begin
+      if (write_enable) begin
+        // If we are writing, decrement counter_input (basically counter_input isn't 0 and we are writing)
+        counter_input <= counter_input - 1;
+      end else if (counter_input == 0) begin
+        // Not writing, but counter_input is 0 meaning we should be padding
+        // If we are not writing, and counter_input is 0, decrement counter_padding
+        counter_padding <= counter_padding - 1;
+        if (counter_padding == 0) begin
+          // If both counters are 0, means we should reset both
+          // If counter_padding is 0, reset counter_input
+          counter_input <= INPUT_HEIGHT;
+          counter_padding <= BLOCK_SIZE-1;
+        end
+      end
+    end
+  end
 
   // Generate the data shift register
   genvar channel, i, j;
@@ -78,85 +108,70 @@ module input_buffer #(
     for (channel = 0; channel < 3; channel = channel + 1) begin
       // For each channel: R, G, B
       for (i = 0; i < IMAGE_HEIGHT; i = i + 1) begin
-        for (j = 0; j < 3; j = j + 1) begin
+        // For each row
+        for (j = 0; j < BLOCK_SIZE; j = j + 1) begin
+          // For each column:
           always @(posedge aclk) begin
             if (!aresetn) begin
+              // Reset: set all values to 0 (although this is not necessary)
               data_reg[channel][i][j] <= 0;
             end else begin
               // Shift data upward by one, bottom comes from input
               // Only write if tvalid and tready
               if (write_enable) begin
+                // Write enable is true, meaning we wish to input FROM axi-stream
                 if (i != IMAGE_HEIGHT-1) begin
                   // Top row and middle row
                   data_reg[channel][i][j] <= data_reg[channel][i+1][j];
                 end else begin
                   // Bottom row
-                  if (j == 0) begin
+                  if (j == BLOCK_SIZE-1) begin
+                    // Bottom RIGHT
                     if (channel == 0) begin
-                      data_reg[channel][i][j] <= left_in_R;
+                      data_reg[channel][i][j] <= tdata[31:24]; // First byte is R
                     end else if (channel == 1) begin
-                      data_reg[channel][i][j] <= left_in_G;
+                      data_reg[channel][i][j] <= tdata[23:16]; // Second byte is G
                     end else begin
-                      data_reg[channel][i][j] <= left_in_B;
+                      data_reg[channel][i][j] <= tdata[15:8]; // Third byte is B
                     end
-                  end else if (j == 1) begin
-                    data_reg[channel][i][j] <= middle_buffer[channel][0];
                   end else begin
-                    data_reg[channel][i][j] <= right_buffer[channel][0];
+                    // Bottom ROW but not the rightmost column
+                    if (channel == 0) begin
+                      data_reg[channel][i][j] <= inputs_R[ (j+1)*DATA_WIDTH-1 : j*DATA_WIDTH ]; // Input 7:0 is leftmost, 15:8 is next, 23:16 is next...
+                    end else if (channel == 1) begin
+                      data_reg[channel][i][j] <= inputs_G[ (j+1)*DATA_WIDTH-1 : j*DATA_WIDTH ]; 
+                    end else begin
+                      data_reg[channel][i][j] <= inputs_B[ (j+1)*DATA_WIDTH-1 : j*DATA_WIDTH ];
+                    end
                   end
                 end
-              end
-            end
-          end
-        end
-      end
-    end
-  endgenerate
-
-  // Generate the delay buffer for the middle and right inputs
-  genvar channel, i;
-  // MIDDLE
-  generate
-    for (channel = 0; channel < 3; channel = channel + 1) begin
-      for (i = 0; i < 3; i = i + 1) begin
-        always @(posedge aclk) begin
-          if (!aresetn) begin
-            middle_buffer[channel][i] <= 0;
-          end else begin
-            if (write_enable) begin
-              // Shift data upward by one, bottom comes from input
-              if (i != 2) begin
-                middle_buffer[channel][i] <= middle_buffer[channel][i+1];
-              end else begin
-                if (channel == 0) begin
-                  middle_buffer[channel][i] <= middle_in_R;
-                end else if (channel == 1) begin
-                  middle_buffer[channel][i] <= middle_in_G;
+              end else if (counter_input == 0) begin
+                // If we are only not writing because counter_input is 0, we should pad.
+                if (i != IMAGE_HEIGHT-1) begin
+                  // Top row and middle row
+                  data_reg[channel][i][j] <= data_reg[channel][i+1][j];
                 end else begin
-                  middle_buffer[channel][i] <= middle_in_B;
+                  // Bottom row
+                  if (j == BLOCK_SIZE-1) begin
+                    // Bottom RIGHT
+                    if (channel == 0) begin
+                      data_reg[channel][i][j] <= 0;
+                    end else if (channel == 1) begin
+                      data_reg[channel][i][j] <= 0;
+                    end else begin
+                      data_reg[channel][i][j] <= 0;
+                    end
+                  end else begin
+                    // Bottom ROW but not the rightmost column
+                    if (channel == 0) begin
+                      data_reg[channel][i][j] <= inputs_R[ (j+1)*DATA_WIDTH-1 : j*DATA_WIDTH ]; // Input 7:0 is leftmost, 15:8 is next, 23:16 is next...
+                    end else if (channel == 1) begin
+                      data_reg[channel][i][j] <= inputs_G[ (j+1)*DATA_WIDTH-1 : j*DATA_WIDTH ]; 
+                    end else begin
+                      data_reg[channel][i][j] <= inputs_B[ (j+1)*DATA_WIDTH-1 : j*DATA_WIDTH ];
+                    end
+                  end
                 end
-              end
-            end
-          end
-        end
-      end
-    end
-  endgenerate
-  // RIGHT
-  generate 
-    for (channel = 0; channel < 3; channel = channel + 1) begin
-      for (i = 0; i < 6; i = i + 1) begin
-        always @(posedge aclk) begin
-          if (!aresetn) begin
-            right_buffer[channel][i] <= 0;
-          end else begin
-            if (write_enable) begin
-              // Shift data upward by one, bottom comes from input
-              if (i != 5) begin
-                right_buffer[channel][i] <= right_buffer[channel][i+1];
-              end else begin
-                // First 8 bits are R, next 8 bits are G, last 8 bits are B
-                right_buffer[channel][i] <= tdata[(channel+1)*DATA_WIDTH-1:channel*DATA_WIDTH];
               end
             end
           end
