@@ -189,11 +189,11 @@ module input_buffer #(
                   end else begin
                     // Bottom ROW but not the rightmost column
                     if (channel == 0) begin
-                      data_reg[channel][i][j] <= inputs_R[ (j+1)*DATA_WIDTH-1 : j*DATA_WIDTH ]; // Input 7:0 is leftmost, 15:8 is next, 23:16 is next...
+                      data_reg[channel][i][j] <= inputs_R[ (j+2)*DATA_WIDTH-1 : (j+1)*DATA_WIDTH ]; // Input 7:0 is leftmost, 15:8 is next, 23:16 is next... (but we don't want LEFTMOST)
                     end else if (channel == 1) begin
-                      data_reg[channel][i][j] <= inputs_G[ (j+1)*DATA_WIDTH-1 : j*DATA_WIDTH ]; 
+                      data_reg[channel][i][j] <= inputs_G[ (j+2)*DATA_WIDTH-1 : (j+1)*DATA_WIDTH ]; 
                     end else begin
-                      data_reg[channel][i][j] <= inputs_B[ (j+1)*DATA_WIDTH-1 : j*DATA_WIDTH ];
+                      data_reg[channel][i][j] <= inputs_B[ (j+2)*DATA_WIDTH-1 : (j+1)*DATA_WIDTH ];
                     end
                   end
                 end
