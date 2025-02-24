@@ -21,8 +21,14 @@ module input_buffer #(
   inputs_G, outputs_G,
   inputs_B, outputs_B,
 
-  // Output module signals (!(output_module_tvalid && !output_module_tready))
-  output_has_back_pressure // If the output module has back pressure, 1 means we shouldn't have any data flow
+  // Output module signals (!(output_module_tvalid && !output_module_tready)) (if output is valid, but we can't write it out)
+  output_has_back_pressure, // If the output module has back pressure, 1 means we shouldn't have any data flow
+
+  // Output signal to output_module, to help it figure out what data is useful
+  is_full_columns_first_input, // If the data input to the processing block has all valid data on all its columns 
+  // This signal is true when: ALL columns are full, and we are sending the FIRST row of input to the processing block
+  // The output buffer is supposed to count how many cycles delay from input to output...
+  data_flowing // If data is flowing from input to output (write enable or padding)
 );
   // AXI-Stream interface
   input wire aclk;
@@ -42,6 +48,11 @@ module input_buffer #(
   input wire [(BLOCK_SIZE-1)*DATA_WIDTH-1:0] inputs_B;
   output wire [BLOCK_SIZE*DATA_WIDTH-1:0] outputs_B;
 
+  // Output module signals
+  input wire output_has_back_pressure;
+  output wire is_full_columns_first_input;
+  output wire data_flowing;
+
   // Define the memory buffer (3 x IMAGE_HEIGHT x BLOCK_SIZE) of [DATA_WIDTH-1:0]
   // [RGB][Y][X]
   reg [DATA_WIDTH-1:0] data_reg[0:2][0:BUFFER_HEIGHT-1][0:BLOCK_SIZE-1];
@@ -56,6 +67,47 @@ module input_buffer #(
   
   // tready: when there are no back pressure AND counter 1 is not 0
   assign tready = !output_has_back_pressure && (counter_input != 0);
+
+  // a flag to indicate if the upcoming input data is the FIRST input data (which may contain useful data in last byte)
+  reg first_input;
+  always @(posedge aclk) begin
+    if (!aresetn) begin
+      first_input <= 1'b1; // Initialize to 1
+    end else begin
+      // If writing and it's the LAST input (indicated by tlast), the reset the flag
+      if (write_enable && tlast) begin
+        first_input <= 1'b1;
+      end else if (write_enable) begin
+        // If writing and it's not the last input, then reset the flag
+        first_input <= 1'b0;
+      end
+    end
+  end
+
+  // A counter to check if the current output to processor block has the full BLOCK_SIZE columns
+  reg [$clog2(BLOCK_SIZE)-1:0] counter_full_columns;
+  always @(posedge aclk) begin
+    if (!aresetn) begin
+      counter_full_columns <= BLOCK_SIZE;
+    end else begin
+      if (first_input) begin 
+        // If first input, then keep the counter at 0
+        counter_full_columns <= BLOCK_SIZE;
+      end else if (counter_input == 1 && counter_padding == BLOCK_SIZE-1 && counter_full_columns != 0 && write_enable) begin
+        // If it's not the first input anymore, AND counter_input == 1 (and we are writing immediately) AND counter_padding == BLOCK_SIZE-1, counter_full_columns should -= 1
+        // Because this combination of counters only occur when a col is FULL and we are about to write padding zeros
+        // Stop incrementing when counter_full_columns == 0 (since next inputs we would be all writing full columns)
+        counter_full_columns <= counter_full_columns - 1; 
+      end
+    end
+  end
+
+  // Assign a flag to indicate to the output module that we are inputting full columns
+  // This signal is true when: ALL columns are full, and we are sending the FIRST row of input to the processing block
+  assign is_full_columns_first_input = counter_full_columns == 0 && counter_input == 0 && counter_padding == BLOCK_SIZE-1;
+
+  // If we are writing to the module, OR we are still doing padding
+  assign data_flowing = write_enable || (counter_input == 0 && !output_has_back_pressure); 
 
   // Backpressure: when the output buffer has a valid value, but ready is not asserted
   // Explanation: If output buffer isn't valid, then we won't worry about "deleting" a valid output
@@ -145,7 +197,8 @@ module input_buffer #(
                     end
                   end
                 end
-              end else if (counter_input == 0) begin
+              end else if (counter_input == 0 && !output_has_back_pressure) begin
+                // We are not reading from AXI-S, but we are padding AND we don't have back pressure
                 // If we are only not writing because counter_input is 0, we should pad.
                 if (i != IMAGE_HEIGHT-1) begin
                   // Top row and middle row

@@ -71,18 +71,20 @@ Processing Logic:
 - The sum result is summed across the 3 rows, and the output is bit-shifted back to an 8-bit representation (Due to filter being less than 1, the result will be less than max of 8-bits).
 
 ## Input Buffer
-This module stores an Nx3 grid of pixels, where N is the number of pixels in a column. Each pixel is represented by 3 8-bit values, one for each RGB channel. (Thus the memory requirement is Nx3x3x8)
+This module stores an Nx3 grid of pixels, where N is the number of pixels in a column. Each pixel is represented by 3 8-bit values, one for each RGB channel. (Thus the memory requirement is `N x 3 x BLOCK_SIZE x 8`)
 
-The buffer receives input from its bottom right corner, and every time an input is received, the buffer shifts all the values up by one row. The new input is stored in the bottom row, where data from top row is discarded into the Processing block. (Note, the Processing Block's output will be to the bottom middle and bottom left of the buffer)
+The buffer receives input from its bottom right corner, and every time an input is received, the buffer shifts all the values up by one row. The new input is stored in the bottom row, where data from top row is discarded into the Processing block. 
 
-The bottom right corner buffer may need to have additional delay due to the 3-cycle delay of the processing block. Same might happen for the middle buffer. 
+The input will occationally be set to 0, where we are anticipating data to be travelling through the processing block, so we wait until the data is about to pass through the processing block to allow the input to "align" with the previous data just returning from the processing block. (Done by 2 counters, one counting column valid inputs, and one counting number of padding zeros to be added)
+
+There's another counter, that counts number of times a FULL COLUMN's input is ready to be sent to processing block. We count number of time this happens, and the BLOCK_SIZE'th time, it means we are inputting FULL data to the processing block.
 
 When the input is complete (last signal), the buffer continues to output one entire column of data to the processing block. From here on out, the input to the buffer should be ignored and ready is set to 0.
 
 Ready may also be set to zero when the pipeline is stalled, where the output buffer is full and not ready to receive new data. (In this case, the processing block's enable will be set to 0, and the input buffer will not write or read data)
 
 ### Major TODO:
-- tready signal
+- tready signal (done, set to equal to if the output has a back-pressure happening)
 - tlast signal
   - Last is high, buffer will keep pushing anything into buffer for IMAGE_HEIGHT+6 cycles (account for the offset). 
 - tstrb signal
