@@ -140,7 +140,7 @@ module input_buffer #(
       if (write_enable) begin
         // If we are writing, decrement counter_input (basically counter_input isn't 0 and we are writing)
         counter_input <= counter_input - 1;
-      end else if (counter_input == 0) begin
+      end else if (counter_input == 0 && !output_has_back_pressure) begin
         // Not writing, but counter_input is 0 meaning we should be padding
         // If we are not writing, and counter_input is 0, decrement counter_padding
         counter_padding <= counter_padding - 1;
