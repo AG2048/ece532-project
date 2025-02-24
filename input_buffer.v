@@ -39,13 +39,13 @@ module input_buffer #(
   input wire [C_AXIS_TDATA_WIDTH-1:0] tdata;
 
   // I/O signals for the processing block
-  input wire [(BLOCK_SIZE-1)*DATA_WIDTH-1:0] inputs_R;
+  input wire [BLOCK_SIZE*DATA_WIDTH-1:0] inputs_R;
   output wire [BLOCK_SIZE*DATA_WIDTH-1:0] outputs_R;
 
-  input wire [(BLOCK_SIZE-1)*DATA_WIDTH-1:0] inputs_G;
+  input wire [BLOCK_SIZE*DATA_WIDTH-1:0] inputs_G;
   output wire [BLOCK_SIZE*DATA_WIDTH-1:0] outputs_G;
 
-  input wire [(BLOCK_SIZE-1)*DATA_WIDTH-1:0] inputs_B;
+  input wire [BLOCK_SIZE*DATA_WIDTH-1:0] inputs_B;
   output wire [BLOCK_SIZE*DATA_WIDTH-1:0] outputs_B;
 
   // Output module signals
