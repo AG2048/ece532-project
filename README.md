@@ -95,3 +95,46 @@ Ready may also be set to zero when the pipeline is stalled, where the output buf
 This module outputs pixels. It may use a FIFO structure, or it could be just one single register that stores the pixel value. 
 
 Output via AXI-S interface.
+
+# IP Modules I/O Spec
+
+## Processing Block
+`enable`: 1 if we want this block to read in and output data. 0 if we stalling the pipeline.
+
+`inputs`: one wide input, `BLOCK_SIZE*INPUT_WIDTH` bits of data. Bits `INPUT_WIDTH-1:0` is the leftmost value input, next value is `INPUT_WIDTH*2-1:INPUT_WIDTH`, and so on.
+
+`outputs`: One wide output. Same shape as input. Should be identical to the input BLOCK_SIZE cycles ago. (assuming no stalling)
+
+`filter_output`: one number, OUTPUT_WIDTH bits. The output of the filter. This value should appear 3 cycles after the last row of the input is received.
+
+## Input Buffer
+`AXI-S Interface`: AXI streaming interface. Ready if we can accept data (we are not stalling and we are not writing padding zeros). tdata should be in the form of \[R,G,B,0\] (each 8 bits).
+
+`tready`: We are ready to receive data. If no backpressure AND `counter_input` is not 0
+
+`inputs_R`: Wide input, same shape as `outputs` of the processing block. This is the data processing block sends to the input buffer. Since the left-most output from the processing block is not used, we do not connect `inputs_R[DATA_WIDTH-1:0]` to anything in the processing block. This value is read back directly to the bottom row of the input buffer, excluding the last column.
+
+`outputs_R`: Wide output, same shape as `inputs` of the processing block. This is the data the input buffer sends to the processing block. This value is output from the top row of the input buffer. 
+
+(Repeat for G and B channels) (There should be 3 processing blocks, one for each channel)
+
+`output_has_back_pressure`: Reading from output buffer. If this value is high, entire pipeline should stall.
+
+`is_full_columns_first_input`: Output to output buffer. If this value is high, the input buffer is sending the first row of data to the processing block. (So the output buffer can count and determine which data is correct output).
+
+`data_flowing`: Output to every module. If this value is high, the input buffer is sending data to the processing block. This is the input buffer's way of telling all other modules that the data is flowing through the pipeline. (This acts as `enable` for the processing block, and changes `tvalid` for the AXI-S output interface)
+
+## Output Buffer
+`AXI-S Interface`: AXI streaming interface.
+
+`tvalid`: When internal counter since when `is_full_columns_first_input` was first set to high AND `data_flowing` is high. We check if the counter is within a range where the `filter_output` of processing block is correct. If so, we are valid. We are NOT valid if: after/during a handshake of tvalid and tready, the `data_flowing` is false (this means we had a correct output, but since pipeline is stalled elsewhere, we don't yet have any new data to output) OR counter is out of range (meaning the data here is not meaningful). When `tvalid` is false, wait until a point where `data_flowing` is true and counter is within range. If handshake just happened, we are valid if `data_flowing` AND counter still in range.
+
+`tdata`: Data output. This is the data the processing block sends to the output buffer. \[R,G,B,0\] (each 8 bits)
+
+`tlast`: Last signal. This is high when the last pixel is outputted. (but we might not need this signal if it's handled at software level)
+
+`output_has_back_pressure`: We set this to high if we are valid, but ready is low. Since this mean we have data to output, but the output device is not ready to receive it.
+
+`is_full_columns_first_input`: When this is high with `data_flowing`, we are outputting the first row of data from the processing block. This is used to determine if the data is correct output.
+
+`data_flowing`: If this is high, the output buffer is outputting data. This is the output buffer's way of telling all other modules that the data is flowing through the pipeline. (This acts as `enable` for the processing block, and changes `tvalid` for the AXI-S output interface)
