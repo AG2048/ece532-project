@@ -87,9 +87,8 @@ Ready may also be set to zero when the pipeline is stalled, where the output buf
 - tready signal (done, set to equal to if the output has a back-pressure happening)
 - tlast signal
   - Last is high, buffer will keep pushing anything into buffer for IMAGE_HEIGHT+6 cycles (account for the offset). 
-- tstrb signal
-  - Would have to account for non-aligned data. Might need to separate R, G, B into different modules
-  - Could split into 3 modules, each only deals with one channel, and have a small block that splits AXIS data into 3 bytes. 
+
+**NOTE: Currently a small issue faced is that after tlast is asserted, the program doesn't keep running for another INPUT_HEIGHT cycles. We should make it such that it asserts tready=0 and run for another INPUT_HEIGHT cycles to flush out the data**
 
 ## Output Buffer
 This module outputs pixels. It may use a FIFO structure, or it could be just one single register that stores the pixel value. 
@@ -124,6 +123,8 @@ Output via AXI-S interface.
 
 `data_flowing`: Output to every module. If this value is high, the input buffer is sending data to the processing block. This is the input buffer's way of telling all other modules that the data is flowing through the pipeline. (This acts as `enable` for the processing block, and changes `tvalid` for the AXI-S output interface)
 
+`output_buffer_is_done`: Input into input buffer. If this is high, it means output buffer has finished one full INPUT_HEIGHT of data. This is used to tell the input buffer to stop feeding data, and begin accepting new data after `tlast` is first asserted. The logic is: after `tlast` is true, we remember that `tlast` was true, and start counting down until all INPUT_HEIGHT data has been outputted. Then, we wait until output buffer is done, then we can forget about `tlast`. In the mean time, tready always false, and we just keep doing same thing as "padding zeros" until we are ready to output data. The other counters will reset at the end of the tlast flushing. (`output_buffer_is_done && counter_after_tlast == 0`)
+
 ## Output Buffer
 `AXI-S Interface`: AXI streaming interface.
 
@@ -138,3 +139,5 @@ Output via AXI-S interface.
 `is_full_columns_first_input`: When this is high with `data_flowing`, we are outputting the first row of data from the processing block. This is used to determine if the data is correct output.
 
 `data_flowing`: If this is high, the output buffer is outputting data. This is the output buffer's way of telling all other modules that the data is flowing through the pipeline. (This acts as `enable` for the processing block, and changes `tvalid` for the AXI-S output interface)
+
+`output_buffer_is_done`: If this is high, the output buffer has finished outputting one full INPUT_HEIGHT of data. Should be set to some `counter==0 && tready && tvalid`... Set to true if this is the last output data successfully sent out after receiving `is_full_columns_first_input` signal.
