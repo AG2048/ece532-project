@@ -11,7 +11,7 @@ module input_buffer #(
   // AXI-Stream interface
   aclk, aresetn,
   tready, tvalid, 
-  tstrb, tdata,
+  tstrb, tdata, tlast,
 
   // Internal signals
   // inputs [(BLOCK_SIZE-1) * DATA_WIDTH - 1:0] (does not include the last col)
@@ -37,6 +37,7 @@ module input_buffer #(
   input wire tvalid;
   input wire [(C_AXIS_TDATA_WIDTH/8)-1:0] tstrb; // Not used
   input wire [C_AXIS_TDATA_WIDTH-1:0] tdata;
+  input wire tlast;
 
   // I/O signals for the processing block
   input wire [BLOCK_SIZE*DATA_WIDTH-1:0] inputs_R;
@@ -119,7 +120,7 @@ module input_buffer #(
   // Counter Padding: Counts down from BLOCK_SIZE-1 to 0 (if count == 0, then reset counter 1)
 
   // Output signals come from the top row of the data_reg
-  genvar i_o_assign_channel, i_o_assign_j
+  genvar i_o_assign_channel, i_o_assign_j;
   generate
     for (i_o_assign_channel = 0; i_o_assign_channel < 3; i_o_assign_channel = i_o_assign_channel + 1) begin
       for (i_o_assign_j = 0; i_o_assign_j < BLOCK_SIZE; i_o_assign_j = i_o_assign_j + 1) begin
@@ -159,7 +160,7 @@ module input_buffer #(
   generate 
     for (channel = 0; channel < 3; channel = channel + 1) begin
       // For each channel: R, G, B
-      for (i = 0; i < IMAGE_HEIGHT; i = i + 1) begin
+      for (i = 0; i < INPUT_HEIGHT; i = i + 1) begin
         // For each row
         for (j = 0; j < BLOCK_SIZE; j = j + 1) begin
           // For each column:
@@ -172,7 +173,7 @@ module input_buffer #(
               // Only write if tvalid and tready
               if (write_enable) begin
                 // Write enable is true, meaning we wish to input FROM axi-stream
-                if (i != IMAGE_HEIGHT-1) begin
+                if (i != INPUT_HEIGHT-1) begin
                   // Top row and middle row
                   data_reg[channel][i][j] <= data_reg[channel][i+1][j];
                 end else begin
@@ -200,7 +201,7 @@ module input_buffer #(
               end else if (counter_input == 0 && !output_has_back_pressure) begin
                 // We are not reading from AXI-S, but we are padding AND we don't have back pressure
                 // If we are only not writing because counter_input is 0, we should pad.
-                if (i != IMAGE_HEIGHT-1) begin
+                if (i != INPUT_HEIGHT-1) begin
                   // Top row and middle row
                   data_reg[channel][i][j] <= data_reg[channel][i+1][j];
                 end else begin
