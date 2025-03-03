@@ -28,7 +28,9 @@ module input_buffer #(
   is_full_columns_first_input, // If the data input to the processing block has all valid data on all its columns 
   // This signal is true when: ALL columns are full, and we are sending the FIRST row of input to the processing block
   // The output buffer is supposed to count how many cycles delay from input to output...
-  data_flowing // If data is flowing from input to output (write enable or padding)
+  data_flowing, // If data is flowing from input to output (write enable or padding)
+
+  output_buffer_is_done // If output buffer is done sending OUT this "batch" of data (as in a full set of INPUT_HEIGHT outputs. This is useful for the last column of input, so input_buffer knows when to stop just pumping out data and start accepting new data)
 );
   // AXI-Stream interface
   input wire aclk;
@@ -53,6 +55,7 @@ module input_buffer #(
   input wire output_has_back_pressure;
   output wire is_full_columns_first_input;
   output wire data_flowing;
+  input wire output_buffer_is_done;
 
   // Define the memory buffer (3 x IMAGE_HEIGHT x BLOCK_SIZE) of [DATA_WIDTH-1:0]
   // [RGB][Y][X]
@@ -66,8 +69,8 @@ module input_buffer #(
   // Counter for padding
   reg [$clog2(BLOCK_SIZE)-1:0] counter_padding;
   
-  // tready: when there are no back pressure AND counter 1 is not 0
-  assign tready = !output_has_back_pressure && (counter_input != 0);
+  // tready: when there are no back pressure AND counter 1 is not 0. AND if we are flushing buffer after tlast. 
+  assign tready = !output_has_back_pressure && (counter_input != 0) && !(tlast_received);
 
   // a flag to indicate if the upcoming input data is the FIRST input data (which may contain useful data in last byte)
   reg first_input;
@@ -81,6 +84,34 @@ module input_buffer #(
       end else if (write_enable) begin
         // If writing and it's not the last input, then reset the flag
         first_input <= 1'b0;
+      end
+    end
+  end
+
+  // a flag that is set true only after a tlast signal is received. Only set to false when the output buffer is done sending out the data
+  reg tlast_received;
+  always @(posedge aclk) begin
+    if (!aresetn) begin
+      tlast_received <= 1'b0;
+    end else begin
+      if (write_enable && tlast) begin
+        tlast_received <= 1'b1;
+      end else if (output_buffer_is_done && counter_after_tlast == 0) begin
+        // Stop the flag after output_buffer has finished all its output, and we have at least flushed the entire buffer once. 
+        tlast_received <= 1'b0;
+      end
+    end
+  end
+  // a counter that counts INPUT_HEIGHT cycles after tlast is received, so we can be sure that the output buffer is done sending out the data. Counts down to 0.
+  reg [$clog2(INPUT_HEIGHT)-1:0] counter_after_tlast;
+  always @(posedge aclk) begin
+    if (!aresetn) begin
+      counter_after_tlast <= INPUT_HEIGHT;
+    end else begin
+      if (tlast && write_enable) begin
+        counter_after_tlast <= INPUT_HEIGHT;
+      end else if (counter_after_tlast != 0) begin
+        counter_after_tlast <= counter_after_tlast - 1;
       end
     end
   end
@@ -107,8 +138,8 @@ module input_buffer #(
   // This signal is true when: ALL columns are full, and we are sending the FIRST row of input to the processing block
   assign is_full_columns_first_input = counter_full_columns == 0 && counter_input == 0 && counter_padding == BLOCK_SIZE-1;
 
-  // If we are writing to the module, OR we are still doing padding
-  assign data_flowing = write_enable || (counter_input == 0 && !output_has_back_pressure); 
+  // If we are writing to the module, OR we are still doing padding. Or, we are currently sending last data after tlast (but also check if no back pressure)
+  assign data_flowing = write_enable || ((counter_input == 0 || tlast_received) && !output_has_back_pressure);
 
   // Backpressure: when the output buffer has a valid value, but ready is not asserted
   // Explanation: If output buffer isn't valid, then we won't worry about "deleting" a valid output
@@ -133,8 +164,8 @@ module input_buffer #(
 
   // Counters logic: 
   always @(posedge aclk) begin
-    if (!aresetn) begin
-      // Reset all counters
+    if (!aresetn || (output_buffer_is_done && counter_after_tlast == 0)) begin
+      // Reset all counters. If resetting, OR if we are done sending out the data after tlast (this signal kinda re-enables tready)
       counter_input <= INPUT_HEIGHT;
       counter_padding <= BLOCK_SIZE-1;
     end else begin
@@ -198,9 +229,10 @@ module input_buffer #(
                     end
                   end
                 end
-              end else if (counter_input == 0 && !output_has_back_pressure) begin
+              end else if ((counter_input == 0 || tlast_received) && !output_has_back_pressure) begin
                 // We are not reading from AXI-S, but we are padding AND we don't have back pressure
                 // If we are only not writing because counter_input is 0, we should pad.
+                // Also we will pad zeros if we are sending the last data after tlast
                 if (i != INPUT_HEIGHT-1) begin
                   // Top row and middle row
                   data_reg[channel][i][j] <= data_reg[channel][i+1][j];
