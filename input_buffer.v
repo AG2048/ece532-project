@@ -65,7 +65,7 @@ module input_buffer #(
   assign write_enable = tvalid && tready;
 
   // Define counters (calculate bit width of INPUT_HEIGHT)
-  reg [$clog2(INPUT_HEIGHT)-1:0] counter_input;
+  reg [$clog2(INPUT_HEIGHT+1)-1:0] counter_input;
   // Counter for padding
   reg [$clog2(BLOCK_SIZE)-1:0] counter_padding;
   
@@ -103,7 +103,7 @@ module input_buffer #(
     end
   end
   // a counter that counts INPUT_HEIGHT cycles after tlast is received, so we can be sure that the output buffer is done sending out the data. Counts down to 0.
-  reg [$clog2(INPUT_HEIGHT)-1:0] counter_after_tlast;
+  reg [$clog2(INPUT_HEIGHT+1)-1:0] counter_after_tlast;
   always @(posedge aclk) begin
     if (!aresetn) begin
       counter_after_tlast <= INPUT_HEIGHT;
@@ -117,7 +117,7 @@ module input_buffer #(
   end
 
   // A counter to check if the current output to processor block has the full BLOCK_SIZE columns
-  reg [$clog2(BLOCK_SIZE)-1:0] counter_full_columns;
+  reg [$clog2(BLOCK_SIZE+1)-1:0] counter_full_columns;
   always @(posedge aclk) begin
     if (!aresetn) begin
       counter_full_columns <= BLOCK_SIZE;

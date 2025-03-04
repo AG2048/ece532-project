@@ -77,8 +77,8 @@ output wire output_buffer_is_done;
 // Valid if wait_counter = 0, outputting counter can be 0 for the last value. Reset both counters when both counters reached 0 and valid&&ready.
 // Valid will be set to false if ready&&valid but data is not flowing.
 
-reg [$clog2(INPUT_HEIGHT+2)-1:0] initial_wait_counter;
-reg [$clog2(INPUT_HEIGHT)-1:0] outputting_counter;
+reg [$clog2(INPUT_HEIGHT+2 + 1)-1:0] initial_wait_counter;
+reg [$clog2(INPUT_HEIGHT-BLOCK_SIZE+1 + 1)-1:0] outputting_counter;
 reg outputting; // a flag register set to true when we receive is_full_columns_first_input
 always @(posedge aclk) begin
   if (!aresetn) begin

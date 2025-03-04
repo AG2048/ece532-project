@@ -12,8 +12,8 @@ module output_buffer_tb #(
   parameter C_AXIS_TDATA_WIDTH = 32,
 
   // These two parameters should be the same, could change for "advanced" features
-  parameter BUFFER_HEIGHT = 20, // How many rows to buffer
-  parameter INPUT_HEIGHT = BUFFER_HEIGHT
+  parameter BUFFER_HEIGHT = 32'd16, // How many rows to buffer
+  parameter INPUT_HEIGHT = 32'd16
 ) ();
 
   reg aclk, aresetn;
@@ -155,7 +155,8 @@ module output_buffer_tb #(
   end
 
   // Testing case:
-  integer i, j;
+  reg [31:0] i;
+  reg [31:0] j;
   initial begin
     aresetn = 1'b0;
     input_buffer_tstrb = 4'hF;
@@ -168,6 +169,8 @@ module output_buffer_tb #(
 
     // Reset Finished.
     output_buffer_tready = 1'b1;
+    $display("Starting test");
+    $display("Input height * 10 = %d", INPUT_HEIGHT*10);
     for (i = 0; i < INPUT_HEIGHT*10; i = i + 1) begin
       input_buffer_tvalid = 1'b1;
       input_buffer_tdata = i * 32'h01010100;
@@ -275,6 +278,8 @@ module output_buffer_tb #(
       end
       if (j == INPUT_HEIGHT*10) begin
         input_buffer_tlast = 1'b1;
+        $display("LAST INPUT");
+        $display("j = %d", j);
         if (input_buffer_tready && input_buffer_tvalid) begin
           #10;
           input_buffer_tvalid = 1'b0;
@@ -284,12 +289,14 @@ module output_buffer_tb #(
       #9;
       i = i + 1;
     end
-    while (!(input_buffer_tready && input_buffer_tvalid)) begin
+    while (!(input_buffer_tready && input_buffer_tvalid) && input_buffer_tlast) begin
+      $display("WAITING FOR LAST INPUT");
       #10;
     end
     #10;
     input_buffer_tvalid = 1'b0;
     input_buffer_tlast = 1'b0;
+    output_buffer_tready = 1'b1; // Make output ready in case program didn't finish on time
     #100;
   end
 
