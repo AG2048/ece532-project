@@ -155,7 +155,7 @@ module output_buffer_tb #(
   end
 
   // Testing case:
-  integer i;
+  integer i, j;
   initial begin
     aresetn = 1'b0;
     input_buffer_tstrb = 4'hF;
@@ -183,19 +183,49 @@ module output_buffer_tb #(
     input_buffer_tlast = 1'b0;
     #100;
 
-    // Run again, without reset.
+    // // Run again, without reset.
+    // output_buffer_tready = 1'b1;
+    // for (i = 0; i < INPUT_HEIGHT*10; i = i + 1) begin
+    //   input_buffer_tvalid = 1'b1;
+    //   input_buffer_tdata = i * 32'h01010100;
+    //   if (!(input_buffer_tready && input_buffer_tvalid)) begin
+    //       i = i - 1;
+    //   end
+    //   if (i == INPUT_HEIGHT*10-1) begin
+    //     input_buffer_tlast = 1'b1;
+    //   end
+    //   #10;
+    // end
+    // input_buffer_tvalid = 1'b0;
+    // input_buffer_tlast = 1'b0;
+    // #100;
+    
+    // Test of input not valid for half inputs
+    j = 0;
+    i = 0;
+    #10;
     output_buffer_tready = 1'b1;
-    for (i = 0; i < INPUT_HEIGHT*10; i = i + 1) begin
-      input_buffer_tvalid = 1'b1;
-      input_buffer_tdata = i * 32'h01010100;
-      if (!(input_buffer_tready && input_buffer_tvalid)) begin
-          i = i - 1;
+    while (j < INPUT_HEIGHT*10) begin
+      input_buffer_tvalid = i % 2;
+      input_buffer_tdata = j * 32'h01010100;
+      if (input_buffer_tready && input_buffer_tvalid) begin
+          j = j + 1;
       end
-      if (i == INPUT_HEIGHT*10-1) begin
+      if (j == INPUT_HEIGHT*10) begin
         input_buffer_tlast = 1'b1;
+        if (input_buffer_tready && input_buffer_tvalid) begin
+          #10;
+          input_buffer_tvalid = 1'b0;
+          input_buffer_tlast = 1'b0;
+        end
       end
       #10;
+      i = i + 1;
     end
+    while (!(input_buffer_tready && input_buffer_tvalid)) begin
+      #10;
+    end
+    #10;
     input_buffer_tvalid = 1'b0;
     input_buffer_tlast = 1'b0;
     #100;
