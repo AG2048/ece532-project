@@ -84,29 +84,44 @@ always @(posedge aclk) begin
   if (!aresetn) begin
     // Reset: set counters to their initial values.
     initial_wait_counter <= BLOCK_SIZE + 2;
-    outputting_counter <= INPUT_HEIGHT-1;
     outputting <= 0;
   end else begin
     if (data_flowing) begin
       // If got full columns first input, start counting
       if (is_full_columns_first_input) begin
-        initial_wait_counter <= initial_wait_counter - 1;
+        initial_wait_counter <= BLOCK_SIZE + 1;
         outputting <= 1;
       end else if (outputting) begin
         // We are in the output cycle:
         if (initial_wait_counter != 0) begin
           // Decrease initial wait counter if it's not 0
           initial_wait_counter <= initial_wait_counter - 1;
-        end else if (outputting_counter != 0) begin
-          // Then decrease outputting counter if it's not 0 (after initial wait counter is 0)
-          outputting_counter <= outputting_counter - 1;
-        end else begin
+        end else if (outputting_counter == 0) begin
           // Both counters are 0, we reset outputting flag only if we are valid and ready
           if (tvalid && tready) begin
             initial_wait_counter <= BLOCK_SIZE + 2;
-            outputting_counter <= INPUT_HEIGHT-1;
             outputting <= 0;
           end
+        end
+      end
+    end
+  end
+end
+
+always @(posedge aclk) begin
+  if (!aresetn) begin
+    // Reset: set counters to their initial values.
+    outputting_counter <= INPUT_HEIGHT-BLOCK_SIZE+1; // Output we don't output the edges which may be mixed with zero paddings (Number of output is INPUT_HEIGHT-BLOCK_SIZE+1)
+  end else begin
+    if (data_flowing && outputting) begin
+      // We are in the output cycle:
+      if (initial_wait_counter == 0 && outputting_counter != 0) begin
+        // Then decrease outputting counter if it's not 0 (after initial wait counter is 0)
+        outputting_counter <= outputting_counter - 1;
+      end else if (outputting_counter == 0) begin
+        // Both counters are 0, we reset outputting flag only if we are valid and ready
+        if (tvalid && tready) begin
+          outputting_counter <= INPUT_HEIGHT-BLOCK_SIZE+1;
         end
       end
     end
@@ -134,7 +149,7 @@ always @(posedge aclk) begin
       tvalid <= 0;
     end else if (data_flowing) begin
       // Data is flowing, we are valid as long as counter is in range
-      if (initial_wait_counter == 1 ||initial_wait_counter == 0) begin
+      if (initial_wait_counter == 0) begin
         tvalid <= 1;
       end
     end else begin

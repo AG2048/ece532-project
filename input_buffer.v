@@ -110,7 +110,7 @@ module input_buffer #(
     end else begin
       if (tlast && write_enable) begin
         counter_after_tlast <= INPUT_HEIGHT;
-      end else if (counter_after_tlast != 0) begin
+      end else if (counter_after_tlast != 0 && tlast_received) begin // don't decrement at all times...
         counter_after_tlast <= counter_after_tlast - 1;
       end
     end
