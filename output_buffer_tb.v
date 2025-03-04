@@ -200,14 +200,45 @@ module output_buffer_tb #(
     // input_buffer_tlast = 1'b0;
     // #100;
     
-    // Test of input not valid for half inputs
+    // // Test of input not valid for half inputs
+    // j = 0;
+    // i = 0;
+    // #10;
+    // output_buffer_tready = 1'b1;
+    // while (j < INPUT_HEIGHT*10) begin
+    //   input_buffer_tvalid = i % 2;
+    //   input_buffer_tdata = j * 32'h01010100;
+    //   if (input_buffer_tready && input_buffer_tvalid) begin
+    //       j = j + 1;
+    //   end
+    //   if (j == INPUT_HEIGHT*10) begin
+    //     input_buffer_tlast = 1'b1;
+    //     if (input_buffer_tready && input_buffer_tvalid) begin
+    //       #10;
+    //       input_buffer_tvalid = 1'b0;
+    //       input_buffer_tlast = 1'b0;
+    //     end
+    //   end
+    //   #10;
+    //   i = i + 1;
+    // end
+    // while (!(input_buffer_tready && input_buffer_tvalid)) begin
+    //   #10;
+    // end
+    // #10;
+    // input_buffer_tvalid = 1'b0;
+    // input_buffer_tlast = 1'b0;
+    // #100;
+
+    // Test of output not ready for half inputs
     j = 0;
     i = 0;
     #10;
-    output_buffer_tready = 1'b1;
+    input_buffer_tvalid = 1'b1;
     while (j < INPUT_HEIGHT*10) begin
-      input_buffer_tvalid = i % 2;
+      output_buffer_tready = i % 2;
       input_buffer_tdata = j * 32'h01010100;
+      #1;
       if (input_buffer_tready && input_buffer_tvalid) begin
           j = j + 1;
       end
@@ -219,7 +250,7 @@ module output_buffer_tb #(
           input_buffer_tlast = 1'b0;
         end
       end
-      #10;
+      #9;
       i = i + 1;
     end
     while (!(input_buffer_tready && input_buffer_tvalid)) begin
