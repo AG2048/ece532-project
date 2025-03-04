@@ -12,7 +12,7 @@ module output_buffer_tb #(
   parameter C_AXIS_TDATA_WIDTH = 32,
 
   // These two parameters should be the same, could change for "advanced" features
-  parameter BUFFER_HEIGHT = 10, // How many rows to buffer
+  parameter BUFFER_HEIGHT = 20, // How many rows to buffer
   parameter INPUT_HEIGHT = BUFFER_HEIGHT
 ) ();
 
@@ -23,14 +23,14 @@ module output_buffer_tb #(
   reg input_buffer_tvalid;
   wire input_buffer_tready;
   reg input_buffer_tlast;
-  reg input_buffer_tstrb;
+  reg [C_AXIS_TDATA_WIDTH/8-1:0] input_buffer_tstrb;
 
   // Output buffer AXI signals
   wire [C_AXIS_TDATA_WIDTH-1:0] output_buffer_tdata;
   wire output_buffer_tvalid;
   reg output_buffer_tready;
   wire output_buffer_tlast;
-  wire output_buffer_tstrb;
+  wire [C_AXIS_TDATA_WIDTH/8-1:0] output_buffer_tstrb;
 
   // Internal signals
   wire [BLOCK_SIZE * DATA_WIDTH - 1:0] inputs_R;
@@ -230,13 +230,44 @@ module output_buffer_tb #(
     // input_buffer_tlast = 1'b0;
     // #100;
 
-    // Test of output not ready for half inputs
+    // // Test of output not ready for half inputs
+    // j = 0;
+    // i = 0;
+    // #10;
+    // input_buffer_tvalid = 1'b1;
+    // while (j < INPUT_HEIGHT*10) begin
+    //   output_buffer_tready = i % 2;
+    //   input_buffer_tdata = j * 32'h01010100;
+    //   #1;
+    //   if (input_buffer_tready && input_buffer_tvalid) begin
+    //       j = j + 1;
+    //   end
+    //   if (j == INPUT_HEIGHT*10) begin
+    //     input_buffer_tlast = 1'b1;
+    //     if (input_buffer_tready && input_buffer_tvalid) begin
+    //       #10;
+    //       input_buffer_tvalid = 1'b0;
+    //       input_buffer_tlast = 1'b0;
+    //     end
+    //   end
+    //   #9;
+    //   i = i + 1;
+    // end
+    // while (!(input_buffer_tready && input_buffer_tvalid)) begin
+    //   #10;
+    // end
+    // #10;
+    // input_buffer_tvalid = 1'b0;
+    // input_buffer_tlast = 1'b0;
+    // #100;
+
+    // Test not ready and not valid. not ready every 2 cycles, not valid every 3 cycles.
     j = 0;
     i = 0;
     #10;
-    input_buffer_tvalid = 1'b1;
     while (j < INPUT_HEIGHT*10) begin
       output_buffer_tready = i % 2;
+      input_buffer_tvalid = i % 3 ? 1'b1 : 1'b0;
       input_buffer_tdata = j * 32'h01010100;
       #1;
       if (input_buffer_tready && input_buffer_tvalid) begin
