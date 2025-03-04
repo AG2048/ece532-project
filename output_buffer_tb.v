@@ -182,6 +182,23 @@ module output_buffer_tb #(
     input_buffer_tvalid = 1'b0;
     input_buffer_tlast = 1'b0;
     #100;
+
+    // Run again, without reset.
+    output_buffer_tready = 1'b1;
+    for (i = 0; i < INPUT_HEIGHT*10; i = i + 1) begin
+      input_buffer_tvalid = 1'b1;
+      input_buffer_tdata = i * 32'h01010100;
+      if (!(input_buffer_tready && input_buffer_tvalid)) begin
+          i = i - 1;
+      end
+      if (i == INPUT_HEIGHT*10-1) begin
+        input_buffer_tlast = 1'b1;
+      end
+      #10;
+    end
+    input_buffer_tvalid = 1'b0;
+    input_buffer_tlast = 1'b0;
+    #100;
   end
 
   initial begin
