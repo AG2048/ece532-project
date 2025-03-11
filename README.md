@@ -54,6 +54,58 @@ main:
     
 ```
 
+## Microblaze Code Structure (Mar 10 Version)
+```c
+// Initialize / Reset (use an external button as such trigger)
+prev_angle = 0
+current_angle = 0
+// camera start writing to frame buffer
+while current_angle < prev_angle:
+  current_angle = current_angle + f(gyro_angular_velocity()) // handle some threshold and gyro stuff
+endwhile
+
+// Capture Image
+pause_camera()
+
+// Bring data to another location
+*new_location_data = read_from_frame_buffer()
+
+// Initialize IP AXIS read
+set_up_read_from_IP_to_DMA() // this is because our read has backpressure, has to be initialized before write to IP. (also specify length wanted to be read)
+
+// Send image to IP core
+if (first_image): 
+  send_right_edge_to_ip()
+else if(last_image):
+  send_left_edge_to_ip()
+else:
+  send_both_edges_to_ip()
+
+// Update gyroscope angle
+prev_angle = current_angle
+
+// Camera start again
+camera_resume()
+
+repeat;
+
+if (all_images_taken){
+  camera_stop();
+  // Write to frame buffer
+  write_image_to_frame_buffer(starting_col);
+  while (!reset) {
+    if (left_button_pressed){
+      starting_col = max(starting_col-1, 0);
+      write_image_to_frame_buffer(starting_col);
+    } else if (right_button_pressed){
+      starting_col = min(starting_col+1, max_col);
+      write_image_to_frame_buffer(starting_col);
+    }
+  }
+}
+```
+
+
 # Custom IP
 The custom IP is 2 modules working together.
 
