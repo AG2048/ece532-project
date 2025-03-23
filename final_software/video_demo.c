@@ -53,6 +53,11 @@
 #define SCU_TIMER_ID XPAR_AXI_TIMER_0_DEVICE_ID
 #define UART_BASEADDR XPAR_UARTLITE_0_BASEADDR
 
+#define FILTER_WIDTH 3 // the image processor has a 3x3 filter. 
+#define START_COLUMN_INDEX 120 // the column index to start processing the image.
+#define END_COLUMN_INDEX 520 // the column index to end processing the image. (exclusive)
+#define BLUR_WIDTH 20 // How many pixels from each side to blur. 
+
 /* ------------------------------------------------------------ */
 /*				Global Variables								*/
 /* ------------------------------------------------------------ */
@@ -258,10 +263,101 @@ void HDMIInitialize()
 	return;
 }
 
-void DemoISR(void *callBackRef, void *pVideo)
+void HDMIISR(void *callBackRef, void *pVideo)
 {
 	char *data = (char *) callBackRef;
 	*data = 1; //set fRefresh to 1
+}
+
+// #############################################################################################
+// ################################# Image Processing Functions ################################  
+// #############################################################################################
+
+/*
+1. Read specific columns of the image to a buffer. (to extract border columns for processor to use)
+2. Store columns of an image to a large buffer, with rooms left for the border columns after processor. 
+3. From the large final image buffer, send specific columns of image to the HDMI output (controlled by button)
+
+For each image, declare a buffer of size: SCAN_WIDTH * 478 * 3 (because 2 rows are used for border...)
+(to be strict, should be 480 - (filter_size // 2))
+row major order. 
+
+
+####### ################################################################
+####### ################################################################
+####### ################################################################
+####### ################################################################
+####### ################################################################
+####### ################################################################
+####### ################################################################
+####### ################################################################
+####### ################################################################
+*/
+void store_columns_row_major_order_from_frame_buffer(int beg_col, int end_col, u8* in_buffer, u8* out_buffer){
+  // store columns from frame buffer to a buffer. in_buffer is meant to be the frame buffer used for HDMI output, which stores the camera inputs.
+  // The size of input buffer is 
+  // beg_col: beginning column to store
+  // end_col: end column to store, EXCLUSIVE
+  // in_buffer: input frame buffer (1920*3 strided, only first 640*3 columns is actually used)
+  // out_buffer: output buffer to store the columns (continuous, the size matches the number of columns stored)
+  // Assuming the input we care about is an image of 640*480*3
+  // Output is in row-major format: pixel i,j is stored at i*(width)*3 + j*3, where width = end_col-beg_col
+  int current_col_pixel = 0;
+  int current_line_pixel = 0;
+  int pixel_count = 0;
+  for(int r = 0; r < 480; r++){
+    for(int c = 0; c < 640; c++){
+      if(c >= beg_col && c < end_col){
+        // Find the index in the in_buffer (column number + row number)
+        u32 current_pixel = current_col_pixel + current_line_pixel;
+        // output buffer at pixel_count is set to the pixel value of the frame buffer
+        out_buffer[pixel_count] = in_buffer[current_pixel];
+        out_buffer[pixel_count+1] = in_buffer[current_pixel+1];
+        out_buffer[pixel_count+2] = in_buffer[current_pixel+2];
+        pixel_count += 3;
+      }
+      current_col_pixel+=3;
+    }
+    current_col_pixel = 0;
+    current_line_pixel += 1920*3;
+  }
+}
+
+void store_image_to_buffer_and_ip_buffer(u8* in_buffer, u8* centre_buffer, u32* edge_ip_input_buffer, u32* edge_ip_output_buffer, u8* edge_result_buffer, bool is_first, bool is_last){
+  // From input buffer of size 1920*1080*3, which only contains 640*480*3 image,
+  // store the image from START_COLUMN_INDEX + BLUR_WIDTH - 1 to END_COLUMN_INDEX - BLUR_WIDTH + 1 (exclusive) to the centre_buffer.
+  // (reason: the blur will produce border of width BLUR_WIDTH-2, the last column sent to blur is also directly displayed)
+
+  // From in buffer, move centre to centre buffer.
+  // Move left edge to ip input buffer, start ip write.
+  // Wait until ip read is done, move edge_ip_output buffer result to an edge_result buffer in row major order in u8 format.
+  // Write RIGHT edge to edge buffer, begin ip read.
+
+  /*
+  (here, the IP dma is already in reading and writing mode, to a target edge_result buffer already)
+  1. Put centre to where we want.
+  2. If not first, put left to the edge_buffer. AND START AXI WRITE. 
+  2.5: wait until IP DMA read is done.
+  2.75: move edge_result_buffer's result to some memory location, change format from u32 to u8
+  3. if not last, put right to the edge_buffer.
+  4. Start IP DMA read
+  */
+}
+
+void convert_centres_and_edges_to_row_major(centre_buffers_pointers, edge_buffers_pointers, u8* full_image_buffer){
+  //input argument: a list of pointers to all centre buffers, and a list of pointers to all edge buffers. In the order of: centre, edge, centre edge, centre edge... centre
+  // convert all the buffers to row major order. and store in ONE big buffer.
+}
+
+void display_image_from_start_col(u8* image_buffer, u8* frame_buffer, int begin_col){
+  // Move image from a full row-major order image buffer to the frame buffer, starting from the begin_col. (don't need to error check if begin_col + 640 > total image length, some other function should handle that)
+}
+
+int compute_new_begin_col(int current_col, int direction, int max_col){
+  // Compute the new begin column based on the current column and the direction. 
+  // If direction is 1, move right, if direction is -1, move left. 
+  // If the new column is out of bounds, keep it at the max or min value. 
+  // max_col is the maximum column value. (the ENDING column value cannot be >= to this. )
 }
 
 /* ------------------------------------------------------------ */
