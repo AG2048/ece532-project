@@ -295,35 +295,6 @@ row major order.
 ####### ################################################################
 ####### ################################################################
 */
-void store_columns_row_major_order_from_frame_buffer(int beg_col, int end_col, u8* in_buffer, u8* out_buffer){
-  // store columns from frame buffer to a buffer. in_buffer is meant to be the frame buffer used for HDMI output, which stores the camera inputs.
-  // The size of input buffer is 
-  // beg_col: beginning column to store
-  // end_col: end column to store, EXCLUSIVE
-  // in_buffer: input frame buffer (1920*3 strided, only first 640*3 columns is actually used)
-  // out_buffer: output buffer to store the columns (continuous, the size matches the number of columns stored)
-  // Assuming the input we care about is an image of 640*480*3
-  // Output is in row-major format: pixel i,j is stored at i*(width)*3 + j*3, where width = end_col-beg_col
-  int current_col_pixel = 0;
-  int current_line_pixel = 0;
-  int pixel_count = 0;
-  for(int r = 0; r < 480; r++){
-    for(int c = 0; c < 640; c++){
-      if(c >= beg_col && c < end_col){
-        // Find the index in the in_buffer (column number + row number)
-        u32 current_pixel = current_col_pixel + current_line_pixel;
-        // output buffer at pixel_count is set to the pixel value of the frame buffer
-        out_buffer[pixel_count] = in_buffer[current_pixel];
-        out_buffer[pixel_count+1] = in_buffer[current_pixel+1];
-        out_buffer[pixel_count+2] = in_buffer[current_pixel+2];
-        pixel_count += 3;
-      }
-      current_col_pixel+=3;
-    }
-    current_col_pixel = 0;
-    current_line_pixel += 1920*3;
-  }
-}
 
 void store_image_to_buffer_and_ip_buffer(u8* in_buffer, u8* centre_buffer, u32* edge_ip_input_buffer_left, u32* edge_ip_input_buffer_right, u32* edge_ip_output_buffer, u8* edge_result_buffer, bool is_first, bool is_last){
   // From input buffer of size 1920*1080*3, which only contains 640*480*3 image,
