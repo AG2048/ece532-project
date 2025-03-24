@@ -53,12 +53,13 @@
 #define SCU_TIMER_ID XPAR_AXI_TIMER_0_DEVICE_ID
 #define UART_BASEADDR XPAR_UARTLITE_0_BASEADDR
 
+/*
+ * Image processing defines
+ */
 #define FILTER_WIDTH 3 // the image processor has a 3x3 filter. 
 #define START_COLUMN_INDEX 120 // the column index to start processing the image.
 #define END_COLUMN_INDEX 520 // the column index to end processing the image. (exclusive)
 #define BLUR_WIDTH 20 // How many pixels from each side to blur. 
-#define CURRENT_COL 0 // The current column index of the image.
-#define MAX_COL 640 // The maximum column index of the image.
 #define NUM_IMAGES 10 // The number of images to process.
 
 /* ------------------------------------------------------------ */
@@ -87,6 +88,15 @@ const ivt_t ivt[] = {
 	videoGpioIvt(VID_GPIO_IRPT_ID, &videoCapt),
 	videoVtcIvt(VID_VTC_IRPT_ID, &(videoCapt.vtc))
 };
+
+/*
+ * Image processor dma and buffer variables. 
+ */
+XAxiDma AxiDma;
+u32* image_processor_input_buffer;
+u32* image_processor_output_buffer;
+#define IMAGE_PROCESSOR_INPUT_BUFFER_SIZE 480 * BLUR_WIDTH * 2 // We send this many pixels each time
+#define IMAGE_PROCESSOR_OUTPUT_BUFFER_SIZE (480-2) * (BLUR_WIDTH * 2 - 2) // We receive this many pixels each time
 
 // #############################################################################################
 // ########################### Camera DMA Functions ############################################
@@ -307,6 +317,9 @@ void store_image_to_buffer_and_ip_buffer(u8* in_buffer, u8* centre_buffer, u32* 
   // Wait until ip read is done, move edge_ip_output buffer result to an edge_result buffer in row major order in u8 format.
   // Write RIGHT edge to edge buffer, begin ip read.
 
+	// edge_ip_input_buffer_left and edge_ip_input_buffer_right are in column major order.
+	// They are in SAME array, but different parts of the array.
+
   /*
   (here, the IP dma is already in reading and writing mode, to a target edge_result buffer already)
   1. Put centre to where we want.
@@ -346,10 +359,10 @@ void store_image_to_buffer_and_ip_buffer(u8* in_buffer, u8* centre_buffer, u32* 
     // TODO: start IP DMA write
     // Wait until IP DMA write and read is done.
     // Move edge_ip_output_buffer to edge_result_buffer in row major order, in u8 format.
-    // The edge_result_buffer is in column major order from left to right.
+    // The edge_result_buffer is in row major order, while the edge_ip_output_buffer is in column major order.
     out_index = 0;
-    for (int col = 0; col < BLUR_WIDTH * 2 - 2; col++) {
-      for (int row = 0; row < 478; row++) {
+    for (int row = 0; row < 478; row++) {
+      for (int col = 0; col < BLUR_WIDTH * 2 - 2; col++) {
         int in_index = row * (BLUR_WIDTH * 2 - 2) + col;
         edge_result_buffer[out_index] = (edge_ip_output_buffer[in_index] >> 24) & 0xFF;
         edge_result_buffer[out_index+1] = (edge_ip_output_buffer[in_index] >> 16) & 0xFF;
@@ -482,6 +495,73 @@ int compute_new_begin_col(int current_col, int direction, int max_col){
 	}
 	return new_col;
   }
+}
+
+
+// #############################################################################################
+// ################################# IP DMA Function ###########################################
+// #############################################################################################
+
+void image_processor_dma_init(){
+	XaxiDma_Config *Config;
+	int Status;
+
+	// Initialize
+	Config = XAxiDma_LookupConfig(XPAR_AXIDMA_0_DEVICE_ID);
+	if (!Config) {
+		xil_printf("No video DMA found for ID %d\r\n", XPAR_AXIDMA_0_DEVICE_ID);
+		return;
+	}
+	Status = XAxiDma_CfgInitialize(&AxiDma, Config);
+	if (Status != XST_SUCCESS) {
+		xil_printf("DMA Configuration Initialization failed %d\r\n", Status);
+		return;
+	}
+
+	// Disable the DMA interrupts
+	XAxiDma_IntrDisable(&AxiDma, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DEVICE_TO_DMA);
+	XAxiDma_IntrDisable(&AxiDma, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DMA_TO_DEVICE);
+}
+
+int image_processor_begin_write(){
+	// Begin a write transfer to the IP. The data should already be in image_processor_input_buffer
+	int transfer_bytes = IMAGE_PROCESSOR_INPUT_BUFFER_SIZE * 4; // 4 bytes per pixel
+	int Status = XAxiDma_SimpleTransfer(&AxiDma, (u32) image_processor_input_buffer, transfer_bytes, XAXIDMA_DMA_TO_DEVICE);
+	if (Status != XST_SUCCESS) {
+		xil_printf("DMA write failed %d\r\n", Status);
+		return XST_FAILURE;
+	}
+	return XST_SUCCESS;
+}
+
+int image_processor_begin_read(){
+	// Begin a read transfer from the IP. The data should be written to image_processor_output_buffer
+	int transfer_bytes = IMAGE_PROCESSOR_OUTPUT_BUFFER_SIZE * 4; // 4 bytes per pixel
+	int Status = XAxiDma_SimpleTransfer(&AxiDma, (u32) image_processor_output_buffer, transfer_bytes, XAXIDMA_DEVICE_TO_DMA);
+	if (Status != XST_SUCCESS) {
+		xil_printf("DMA read failed %d\r\n", Status);
+		return XST_FAILURE;
+	}
+	return XST_SUCCESS;
+}
+
+int image_processor_wait_until_done(){
+	// Wait until the DMA transfer is done. 
+	int Status;
+	while (XAxiDma_Busy(&AxiDma, XAXIDMA_DMA_TO_DEVICE) || XAxiDma_Busy(&AxiDma, XAXIDMA_DEVICE_TO_DMA)) {
+		// Wait
+	}
+	Status = XAxiDma_GetError(&AxiDma, XAXIDMA_DMA_TO_DEVICE);
+	if (Status) {
+		xil_printf("DMA write error %d\r\n", Status);
+		return XST_FAILURE;
+	}
+	Status = XAxiDma_GetError(&AxiDma, XAXIDMA_DEVICE_TO_DMA);
+	if (Status) {
+		xil_printf("DMA read error %d\r\n", Status);
+		return XST_FAILURE;
+	}
+	return XST_SUCCESS;
 }
 
 /* ------------------------------------------------------------ */
