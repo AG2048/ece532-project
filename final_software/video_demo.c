@@ -356,8 +356,11 @@ void store_image_to_buffer_and_ip_buffer(u8* in_buffer, u8* centre_buffer, u32* 
       }
     }
     // Start IP DMA write
-    // TODO: start IP DMA write
+		image_processor_begin_write();
+
     // Wait until IP DMA write and read is done.
+		image_processor_wait_until_done();
+
     // Move edge_ip_output_buffer to edge_result_buffer in row major order, in u8 format.
     // The edge_result_buffer is in row major order, while the edge_ip_output_buffer is in column major order.
     out_index = 0;
@@ -383,8 +386,9 @@ void store_image_to_buffer_and_ip_buffer(u8* in_buffer, u8* centre_buffer, u32* 
         out_index++;
       }
     }
+
     // Start IP DMA read
-    // TODO start IP DMA read to edge_ip_output_buffer
+		image_processor_begin_read();
   }
 
 
