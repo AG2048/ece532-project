@@ -323,7 +323,7 @@ void store_columns_row_major_order_from_frame_buffer(int beg_col, int end_col, u
   }
 }
 
-void store_image_to_buffer_and_ip_buffer(u8* in_buffer, u8* centre_buffer, u32* edge_ip_input_buffer, u32* edge_ip_output_buffer, u8* edge_result_buffer, bool is_first, bool is_last){
+void store_image_to_buffer_and_ip_buffer(u8* in_buffer, u8* centre_buffer, u32* edge_ip_input_buffer_left, u32* edge_ip_input_buffer_right, u32* edge_ip_output_buffer, u8* edge_result_buffer, bool is_first, bool is_last){
   // From input buffer of size 1920*1080*3, which only contains 640*480*3 image,
   // store the image from START_COLUMN_INDEX + BLUR_WIDTH - 1 to END_COLUMN_INDEX - BLUR_WIDTH + 1 (exclusive) to the centre_buffer.
   // (reason: the blur will produce border of width BLUR_WIDTH-2, the last column sent to blur is also directly displayed)
@@ -342,6 +342,63 @@ void store_image_to_buffer_and_ip_buffer(u8* in_buffer, u8* centre_buffer, u32* 
   3. if not last, put right to the edge_buffer.
   4. Start IP DMA read
   */
+
+  // 1. Put centre to where we want.
+  int out_index = 0;
+  for (int row = 0; row < 480-2; row++){
+    for(int col = START_COLUMN_INDEX + BLUR_WIDTH - 1; col < END_COLUMN_INDEX - BLUR_WIDTH + 1; col++){
+      int in_index = row * 1920 * 3 + col * 3;
+      centre_buffer[out_index] = in_buffer[in_index];
+      centre_buffer[out_index+1] = in_buffer[in_index+1];
+      centre_buffer[out_index+2] = in_buffer[in_index+2];
+      out_index += 3;
+    }
+  }
+
+  // 2. If not first, put left to the edge_buffer. AND START AXI WRITE.
+  if(!is_first){
+    // Move left edge to the edge_ip_input_buffer, in column major order.
+    int out_index = 0;
+    for (int col = START_COLUMN_INDEX; col < START_COLUMN_INDEX + BLUR_WIDTH; col++){
+      for(int row = 0; row < 480; row++){
+        int in_index = row * 1920 * 3 + col * 3;
+        edge_ip_input_buffer_right[out_index] = ((in_buffer[in_index] << 24) | (in_buffer[in_index+1] << 16) | in_buffer[in_index+2] << 8) & 0xFFFFFF00;
+        out_index++;
+      }
+    }
+    // Start IP DMA write
+    // TODO: start IP DMA write
+    // Wait until IP DMA write and read is done.
+    // Move edge_ip_output_buffer to edge_result_buffer in row major order, in u8 format.
+    // The edge_result_buffer is in column major order from left to right.
+    out_index = 0;
+    for (int col = 0; col < BLUR_WIDTH * 2 - 2; col++) {
+      for (int row = 0; row < 478; row++) {
+        int in_index = row * (BLUR_WIDTH * 2 - 2) + col;
+        edge_result_buffer[out_index] = (edge_ip_output_buffer[in_index] >> 24) & 0xFF;
+        edge_result_buffer[out_index+1] = (edge_ip_output_buffer[in_index] >> 16) & 0xFF;
+        edge_result_buffer[out_index+2] = (edge_ip_output_buffer[in_index] >> 8) & 0xFF;
+        out_index += 3;
+      }
+    }
+  }
+
+  // 3. If not last, put right to the edge_buffer.
+  if(!is_last){
+    // Move right edge to the edge_ip_input_buffer, in column major order.
+    int out_index = 0;
+    for (int col = END_COLUMN_INDEX - BLUR_WIDTH; col < END_COLUMN_INDEX; col++){
+      for(int row = 0; row < 480; row++){
+        int in_index = row * 1920 * 3 + col * 3;
+        edge_ip_input_buffer_left[out_index] = ((in_buffer[in_index] << 24) | (in_buffer[in_index+1] << 16) | in_buffer[in_index+2] << 8) & 0xFFFFFF00;
+        out_index++;
+      }
+    }
+    // Start IP DMA read
+    // TODO start IP DMA read to edge_ip_output_buffer
+  }
+
+
 }
 
 void convert_centres_and_edges_to_row_major(centre_buffers_pointers, edge_buffers_pointers, u8* full_image_buffer){
