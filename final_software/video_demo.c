@@ -57,6 +57,8 @@
 #define START_COLUMN_INDEX 120 // the column index to start processing the image.
 #define END_COLUMN_INDEX 520 // the column index to end processing the image. (exclusive)
 #define BLUR_WIDTH 20 // How many pixels from each side to blur. 
+#define CURRENT_COL 0 // The current column index of the image.
+#define MAX_COL 640 // The maximum column index of the image.
 
 /* ------------------------------------------------------------ */
 /*				Global Variables								*/
@@ -406,8 +408,34 @@ void convert_centres_and_edges_to_row_major(centre_buffers_pointers, edge_buffer
   // convert all the buffers to row major order. and store in ONE big buffer.
 }
 
-void display_image_from_start_col(u8* image_buffer, u8* frame_buffer, int begin_col){
+void display_image_from_start_col(u8* image_buffer, u8* frame_buffer, int begin_col, int total_width){ //UPDATE: added total_width
   // Move image from a full row-major order image buffer to the frame buffer, starting from the begin_col. (don't need to error check if begin_col + 640 > total image length, some other function should handle that)
+
+	int height = 480;
+	int width = 640;
+
+	int frame_pixel = 0;
+	int current_col_pixel = begin_col*3;
+	int current_line_pixel = 0;
+	// avoid using multiplication in the loop.
+
+
+	for(int row = 0; row < height; row++){
+		for(int col = begin_col; col < begin_col + width; col++){
+			u32 current_pixel = current_col_pixel + current_line_pixel;
+			frame_buffer[frame_pixel] = image_buffer[current_pixel];
+			frame_buffer[frame_pixel+1] = image_buffer[current_pixel+1];
+			frame_buffer[frame_pixel+2] = image_buffer[current_pixel+2];
+
+			// Move to the next pixel. 
+			frame_pixel += 3;
+			current_col_pixel += 3;
+		}
+
+		// Move to the next row, reset the column pixel.
+		current_col_pixel = begin_col*3;
+		current_line_pixel += total_width*3; // TODO: check if this is correct.
+	}
 }
 
 int compute_new_begin_col(int current_col, int direction, int max_col){
@@ -415,6 +443,27 @@ int compute_new_begin_col(int current_col, int direction, int max_col){
   // If direction is 1, move right, if direction is -1, move left. 
   // If the new column is out of bounds, keep it at the max or min value. 
   // max_col is the maximum column value. (the ENDING column value cannot be >= to this. )
+
+  // TODO: test and find a good shift size.
+  int shift_size = 10; // How many pixels to shift.
+
+  if(direction == 1){
+	// Move right
+	int new_col = current_col + shift_size;
+
+	// If the new column is out of bounds, keep it at the max value.
+	if(new_col >= max_col-640){
+	  return max_col - 640;
+	}
+	return new_col;
+  } else if(direction == -1){
+	// Move left
+	int new_col = current_col - shift_size;
+	if(new_col < 0){
+	  return 0;
+	}
+	return new_col;
+  }
 }
 
 /* ------------------------------------------------------------ */
