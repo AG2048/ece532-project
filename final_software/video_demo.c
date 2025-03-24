@@ -60,6 +60,7 @@
 #define START_COLUMN_INDEX 120 // the column index to start processing the image.
 #define END_COLUMN_INDEX 520 // the column index to end processing the image. (exclusive)
 #define BLUR_WIDTH 20 // How many pixels from each side to blur. 
+#define CENTRE_WIDTH (END_COLUMN_INDEX - START_COLUMN_INDEX - 2*BLUR_WIDTH + 2) // The width of the centre image. (extends 2 pixels into the blur region, due to blur being 1 pixel less on each side)
 #define NUM_IMAGES 10 // The number of images to process.
 
 /* ------------------------------------------------------------ */
@@ -529,7 +530,9 @@ void image_processor_dma_init(){
 
 int image_processor_begin_write(){
 	// Begin a write transfer to the IP. The data should already be in image_processor_input_buffer
+	// Flush cache:
 	int transfer_bytes = IMAGE_PROCESSOR_INPUT_BUFFER_SIZE * 4; // 4 bytes per pixel
+	Xil_DCacheFlushRange((unsigned int) image_processor_input_buffer, transfer_bytes);
 	int Status = XAxiDma_SimpleTransfer(&AxiDma, (u32) image_processor_input_buffer, transfer_bytes, XAXIDMA_DMA_TO_DEVICE);
 	if (Status != XST_SUCCESS) {
 		xil_printf("DMA write failed %d\r\n", Status);
@@ -568,6 +571,11 @@ int image_processor_wait_until_done(){
 	return XST_SUCCESS;
 }
 
+// #############################################################################################
+// ################################# Gyro Function #############################################
+// #############################################################################################
+
+int delta_angle(); // Reads from gyro and compute the "delta angle" since last call.
 /* ------------------------------------------------------------ */
 /*				Procedure Definitions							*/
 /* ------------------------------------------------------------ */
@@ -579,7 +587,110 @@ int main(void)
 
 	HDMIInitialize();
 	camera_dma_init();
+	image_processor_dma_init();
+
+	// Frame buffer storing the current camera frame.
 	u8* frame = dispCtrl.framePtr[dispCtrl.curFrame];
+
+	// Define image storage buffers.
+	u8* centre_buffers[NUM_IMAGES];
+	u8* edge_result_buffers[NUM_IMAGES-1];
+	for (int i = 0; i < NUM_IMAGES; i++){
+		centre_buffers[i] = (u8*) malloc(478 * CENTRE_WIDTH * 3);
+	}
+	for (int i = 0; i < NUM_IMAGES-1; i++){
+		edge_result_buffers[i] = (u8*) malloc(478 * (BLUR_WIDTH * 2 - 2) * 3);
+	}
+
+	// Define IP buffers.
+	image_processor_input_buffer = (u32*) malloc(IMAGE_PROCESSOR_INPUT_BUFFER_SIZE * 4); // 4 bytes per pixel
+	image_processor_output_buffer = (u32*) malloc(IMAGE_PROCESSOR_OUTPUT_BUFFER_SIZE * 4); // 4 bytes per pixel
+
+	// Define the "left edge input" and "right edge input" of the image_processor_input_buffer.
+	u32* edge_ip_input_buffer_left = image_processor_input_buffer;
+	u32* edge_ip_input_buffer_right = image_processor_input_buffer + 480 * BLUR_WIDTH;
+
+	// Define the final output buffer.
+	u8* full_image_buffer = (u8*) malloc((NUM_IMAGES * (CENTRE_WIDTH) + (NUM_IMAGES-1) * (2 * BLUR_WIDTH - 2)) * 478 * 3);
+
+	int reset_button_state = 0;
+	int current_image_index = 0;
+	int started = 0;
+	int previous_angle = 0;
+	int current_angle = 0;
+	int display_col_index = 0;
+	int left_button_state = 0;
+	int right_button_state = 0;
+
+	int max_col = (NUM_IMAGES * (CENTRE_WIDTH) + (NUM_IMAGES-1) * (2 * BLUR_WIDTH - 2));
+	int angle_difference_threshold = 360 / NUM_IMAGES; // TODO: should be the FOV covered by the centre of the camera.
+
+	while (1) {
+		// Read the reset button. If it changed and is now pressed, reset everything
+		int current_button_state = XGpio_DiscreteRead(&BTNInst, 1); // TODO: choose the correct button
+		if (current_button_state != reset_button_state && current_button_state == 1) {
+			// Reset everything
+			current_image_index = 0;
+			started = 1; // indicate that we have started
+			previous_angle = 0;
+			current_angle = 0;
+			display_col_index = 0;
+			left_button_state = 0;
+			right_button_state = 0;
+			camera_dma_init(); // Make sure the camera is running
+		}
+		reset_button_state = current_button_state;
+
+		if (current_image_index == NUM_IMAGES) {
+			// We have processed all images, display the entire image, while checking for left or right button presses.
+			// Check left button press
+			int current_left_button_state = XGpio_DiscreteRead(&BTNInst, 1); // TODO: choose the correct button
+			if (current_left_button_state != left_button_state && current_left_button_state == 1) {
+				// Move left
+				display_col_index = compute_new_begin_col(display_col_index, -1, max_col);
+			}
+			left_button_state = current_left_button_state;
+
+			// Check right button press
+			int current_right_button_state = XGpio_DiscreteRead(&BTNInst, 1); // TODO: choose the correct button
+			if (current_right_button_state != right_button_state && current_right_button_state == 1) {
+				// Move right
+				display_col_index = compute_new_begin_col(display_col_index, 1, max_col);
+			}
+			right_button_state = current_right_button_state;
+
+			// Display the image
+			display_image_from_start_col(full_image_buffer, frame, display_col_index, max_col);
+		} else {
+			// Not all images are collected yet, continue processing images.
+
+			// Update angle
+			// TODO:
+			current_angle += delta_angle();
+
+			// If angle has changed enough, process the next image.
+			if (current_angle - previous_angle > angle_difference_threshold) {
+				// Process the next image
+				// Pause camera
+				camera_dma_stop();
+				// Process the image
+				store_image_to_buffer_and_ip_buffer(frame, centre_buffers[current_image_index], edge_ip_input_buffer_left, edge_ip_input_buffer_right, image_processor_output_buffer, edge_result_buffers[current_image_index-1], current_image_index == 0, current_image_index == NUM_IMAGES-1);
+				current_image_index++;
+				previous_angle = current_angle;
+				if (current_image_index == NUM_IMAGES) {
+					// Convert the images to row major order.
+					convert_centres_and_edges_to_row_major(centre_buffers, edge_result_buffers, full_image_buffer);
+					// Don't resume camera, we are done processing images.
+				} else {
+					// Resume camera
+					camera_dma_init();
+				}
+			}
+
+		}
+
+	}
+	
 //	xil_printf("ajlsdhfajk\n");
 //	usleep(10000000);
 //	for(int i = 0; i < 640*3; i=i+3){
