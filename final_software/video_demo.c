@@ -458,10 +458,18 @@ void display_image_from_start_col(u8* image_buffer, u8* frame_buffer, int begin_
 
 	for(int row = 0; row < height; row++){
 		for(int col = begin_col; col < begin_col + width; col++){
-			u32 current_pixel = current_col_pixel + current_line_pixel;
-			frame_buffer[frame_pixel] = image_buffer[current_pixel];
-			frame_buffer[frame_pixel+1] = image_buffer[current_pixel+1];
-			frame_buffer[frame_pixel+2] = image_buffer[current_pixel+2];
+            u32 current_pixel = current_col_pixel + current_line_pixel;
+
+            if (row == 0 || row == height - 1) {
+                // Add black pixels for the first and last rows
+                frame_buffer[frame_pixel] = 0x00;
+                frame_buffer[frame_pixel + 1] = 0x00;
+                frame_buffer[frame_pixel + 2] = 0x00;
+            } else {
+                frame_buffer[frame_pixel] = image_buffer[current_pixel];
+                frame_buffer[frame_pixel + 1] = image_buffer[current_pixel + 1];
+                frame_buffer[frame_pixel + 2] = image_buffer[current_pixel + 2];
+            }
 
 			// Move to the next pixel. 
 			frame_pixel += 3;
