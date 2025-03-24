@@ -59,6 +59,7 @@
 #define BLUR_WIDTH 20 // How many pixels from each side to blur. 
 #define CURRENT_COL 0 // The current column index of the image.
 #define MAX_COL 640 // The maximum column index of the image.
+#define NUM_IMAGES 10 // The number of images to process.
 
 /* ------------------------------------------------------------ */
 /*				Global Variables								*/
@@ -320,6 +321,8 @@ void store_image_to_buffer_and_ip_buffer(u8* in_buffer, u8* centre_buffer, u32* 
   int out_index = 0;
   for (int row = 0; row < 480-2; row++){
     for(int col = START_COLUMN_INDEX + BLUR_WIDTH - 1; col < END_COLUMN_INDEX - BLUR_WIDTH + 1; col++){
+	  // I wrote with addition because multiplicaiton here is very slow
+	  // I do not think the compiler will optimize this, so I will do it manually. -- Robert
       int in_index = row * 1920 * 3 + col * 3;
       centre_buffer[out_index] = in_buffer[in_index];
       centre_buffer[out_index+1] = in_buffer[in_index+1];
@@ -374,9 +377,53 @@ void store_image_to_buffer_and_ip_buffer(u8* in_buffer, u8* centre_buffer, u32* 
 
 }
 
-void convert_centres_and_edges_to_row_major(centre_buffers_pointers, edge_buffers_pointers, u8* full_image_buffer){
-  //input argument: a list of pointers to all centre buffers, and a list of pointers to all edge buffers. In the order of: centre, edge, centre edge, centre edge... centre
-  // convert all the buffers to row major order. and store in ONE big buffer.
+void convert_centres_and_edges_to_row_major(u8** centre_buffers_pointers, u8** edge_buffers_pointers, u8** full_image_buffer){
+  // input format: a list of pointers to all centre buffers, and a list of pointers to all edge buffers.
+  // Assuming NUM_IMAGES of center and NUM_IMAGES+1 of edge, first and last edge only half used.
+  // center: continuous CENTER_WIDTH*480*3 bytes, edge: 2 continuous (BLUR_WIDTH)*480*3 bytes ith right then i+1th left.
+  // output format: assuming the output is row major order, one image after another, each of size (center_width + 2*blur_width)*480*3.
+  for(int i = 0; i < NUM_IMAGES; i++) {
+	// Convert the centre buffer to row major order.
+	int out_index = 0;
+	int center_index = 0;
+	int edge_column_offset = 0;
+	for (int row = 0; row < 480; row++){
+	  edge_column_offset += 3;
+	  edge_right = edge_column_offset;
+	  edge_left = edge_column_offset + 3 * 480 * BLUR_WIDTH;
+	  for(int col = 0; col < 2*BLUR_WIDTH + END_COLUMN_INDEX - START_COLUMN_INDEX; col++){
+		if (col < BLUR_WIDTH) { // left col major edge 
+			full_image_buffer[i][out_index] = edge_buffers_pointers[i][edge_left];
+			full_image_buffer[i][out_index+1] = edge_buffers_pointers[i][edge_left+1];
+			full_image_buffer[i][out_index+2] = edge_buffers_pointers[i][edge_left+2];
+			edge_left += 3 * 480;
+		}else if(col >= BLUR_WIDTH + END_COLUMN_INDEX - START_COLUMN_INDEX){ // right col major edge
+			full_image_buffer[i][out_index] = edge_buffers_pointers[i+1][edge_right];
+			full_image_buffer[i][out_index+1] = edge_buffers_pointers[i+1][edge_right+1];
+			full_image_buffer[i][out_index+2] = edge_buffers_pointers[i+1][edge_right+2];
+			edge_right += 3 * 480;
+		}else{ // row major center
+			full_image_buffer[i][out_index] = centre_buffers_pointers[i][center_index];
+			full_image_buffer[i][out_index+1] = centre_buffers_pointers[i][center_index+1];
+			full_image_buffer[i][out_index+2] = centre_buffers_pointers[i][center_index+2];
+			center_index += 3;
+		}
+		out_index += 3;
+	  }
+	}
+
+	// Convert the edge buffer to row major order.
+	out_index = 0;
+	for (int row = 0; row < 480; row++){
+	  for(int col = 0; col < 2*BLUR_WIDTH - 2; col++){
+		int in_index = row * (2*BLUR_WIDTH - 2) + col;
+		full_image_buffer[i][out_index] = edge_buffers_pointers[i][in_index];
+		full_image_buffer[i][out_index+1] = edge_buffers_pointers[i][in_index+1];
+		full_image_buffer[i][out_index+2] = edge_buffers_pointers[i][in_index+2];
+		out_index += 3;
+	  }
+	}
+  }
 }
 
 void display_image_from_start_col(u8* image_buffer, u8* frame_buffer, int begin_col, int total_width){ //UPDATE: added total_width
