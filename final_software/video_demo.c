@@ -61,7 +61,9 @@
 #define END_COLUMN_INDEX 520 // the column index to end processing the image. (exclusive)
 #define BLUR_WIDTH 20 // How many pixels from each side to blur. 
 #define CENTRE_WIDTH (END_COLUMN_INDEX - START_COLUMN_INDEX - 2*BLUR_WIDTH + 2) // The width of the centre image. (extends 2 pixels into the blur region, due to blur being 1 pixel less on each side)
+#define EDGE_WIDTH (2*BLUR_WIDTH - 2) // The width of the edge image. (the blur region)
 #define NUM_IMAGES 10 // The number of images to process.
+#define FINAL_WIDTH (NUM_IMAGES * CENTRE_WIDTH + (NUM_IMAGES-1) * EDGE_WIDTH) // The final width of the image.
 
 /* ------------------------------------------------------------ */
 /*				Global Variables								*/
@@ -308,7 +310,9 @@ row major order.
 ####### ################################################################
 */
 
-void store_image_to_buffer_and_ip_buffer(u8* in_buffer, u8* centre_buffer, u32* edge_ip_input_buffer_left, u32* edge_ip_input_buffer_right, u32* edge_ip_output_buffer, u8* edge_result_buffer, bool is_first, bool is_last){
+void store_image_to_buffer_and_ip_buffer(u8* in_buffer, u32* edge_ip_input_buffer_left, u32* edge_ip_input_buffer_right, u32* edge_ip_output_buffer, int current_image_index, u8* full_image_buffer){
+  bool is_first = current_image_index == 0;
+  bool is_last = current_image_index == NUM_IMAGES - 1;
   // From input buffer of size 1920*1080*3, which only contains 640*480*3 image,
   // store the image from START_COLUMN_INDEX + BLUR_WIDTH - 1 to END_COLUMN_INDEX - BLUR_WIDTH + 1 (exclusive) to the centre_buffer.
   // (reason: the blur will produce border of width BLUR_WIDTH-2, the last column sent to blur is also directly displayed)
@@ -332,18 +336,31 @@ void store_image_to_buffer_and_ip_buffer(u8* in_buffer, u8* centre_buffer, u32* 
   */
 
   // 1. Put centre to where we want.
-  int out_index = 0;
-  for (int row = 0; row < 480-2; row++){
-    for(int col = START_COLUMN_INDEX + BLUR_WIDTH - 1; col < END_COLUMN_INDEX - BLUR_WIDTH + 1; col++){
-	  // I wrote with addition because multiplicaiton here is very slow
-	  // I do not think the compiler will optimize this, so I will do it manually. -- Robert
-      int in_index = row * 1920 * 3 + col * 3;
-      centre_buffer[out_index] = in_buffer[in_index];
-      centre_buffer[out_index+1] = in_buffer[in_index+1];
-      centre_buffer[out_index+2] = in_buffer[in_index+2];
-      out_index += 3;
-    }
+  int in_i = (1920 + START_COLUMN_INDEX + BLUR_WIDTH - 1) * 3; // starting at the center on the second line for current frame
+  int full_i = (FINAL_WIDTH + current_image_index * (CENTRE_WIDTH + EDGE_WIDTH)) * 3; // starting at the center on the second line for current frame in full frame
+  for (int r = 1; r < 479; r++) {
+    for(int c = START_COLUMN_INDEX + BLUR_WIDTH - 1; c < END_COLUMN_INDEX - BLUR_WIDTH + 1; c++){
+	  full_image_buffer[full_i] = in_buffer[in_i];
+	  full_image_buffer[full_i+1] = in_buffer[in_i+1];
+	  full_image_buffer[full_i+2] = in_buffer[in_i+2];
+	  full_i += 3;
+	  in_i += 3; 
+	}
+	// move to next line same position then back CENTRE_WIDTH
+	full_i += (FINAL_WIDTH - CENTRE_WIDTH) * 3;
+	in_i += (1920 - CENTRE_WIDTH) * 3;
   }
+
+//   int out_index = 0;
+//   for (int row = 0; row < 480-2; row++){
+//     for(int col = START_COLUMN_INDEX + BLUR_WIDTH - 1; col < END_COLUMN_INDEX - BLUR_WIDTH + 1; col++){
+//       int in_index = row * 1920 * 3 + col * 3;
+//       centre_buffer[out_index] = in_buffer[in_index];
+//       centre_buffer[out_index+1] = in_buffer[in_index+1];
+//       centre_buffer[out_index+2] = in_buffer[in_index+2];
+//       out_index += 3;
+//     }
+//   }
 
   // 2. If not first, put left to the edge_buffer. AND START AXI WRITE.
   if(!is_first){
@@ -364,16 +381,30 @@ void store_image_to_buffer_and_ip_buffer(u8* in_buffer, u8* centre_buffer, u32* 
 
     // Move edge_ip_output_buffer to edge_result_buffer in row major order, in u8 format.
     // The edge_result_buffer is in row major order, while the edge_ip_output_buffer is in column major order.
-    out_index = 0;
-    for (int row = 0; row < 478; row++) {
-      for (int col = 0; col < BLUR_WIDTH * 2 - 2; col++) {
-        int in_index = row * (BLUR_WIDTH * 2 - 2) + col;
-        edge_result_buffer[out_index] = (edge_ip_output_buffer[in_index] >> 24) & 0xFF;
-        edge_result_buffer[out_index+1] = (edge_ip_output_buffer[in_index] >> 16) & 0xFF;
-        edge_result_buffer[out_index+2] = (edge_ip_output_buffer[in_index] >> 8) & 0xFF;
-        out_index += 3;
-      }
-    }
+    // out_index = 0;
+    // for (int row = 0; row < 478; row++) {
+    //   for (int col = 0; col < BLUR_WIDTH * 2 - 2; col++) {
+    //     int in_index = row * (BLUR_WIDTH * 2 - 2) + col;
+    //     edge_result_buffer[out_index] = (edge_ip_output_buffer[in_index] >> 24) & 0xFF;
+    //     edge_result_buffer[out_index+1] = (edge_ip_output_buffer[in_index] >> 16) & 0xFF;
+    //     edge_result_buffer[out_index+2] = (edge_ip_output_buffer[in_index] >> 8) & 0xFF;
+    //     out_index += 3;
+    //   }
+    // }
+	out_index = (FINAL_WIDTH + CENTRE_WIDTH + (current_image_index - 1) * (EDGE_WIDTH + CENTRE_WIDTH)) * 3; // edge starting location in full frame
+	for (int row = 0; row < 478; row++) {
+	  int in_index = row;
+	  for (int col = 0; col < BLUR_WIDTH * 2 - 2; col++) {
+		// edge ip out buf: edge width * 478
+		// full: 478 * edge width 
+		full_image_buffer[out_index] = (edge_ip_output_buffer[in_index] >> 24) & 0xFF;
+		full_image_buffer[out_index+1] = (edge_ip_output_buffer[in_index] >> 16) & 0xFF;
+		full_image_buffer[out_index+2] = (edge_ip_output_buffer[in_index] >> 8) & 0xFF;
+		out_index += 3;
+		in_index +=  478;
+	  }
+	  out_index += (FINAL_WIDTH - EDGE_WIDTH) * 3;
+	}
   }
 
   // 3. If not last, put right to the edge_buffer.
@@ -619,7 +650,8 @@ int main(void)
 	u32* edge_ip_input_buffer_right = image_processor_input_buffer + 480 * BLUR_WIDTH;
 
 	// Define the final output buffer.
-	u8* full_image_buffer = (u8*) malloc((NUM_IMAGES * (CENTRE_WIDTH) + (NUM_IMAGES-1) * (2 * BLUR_WIDTH - 2)) * 478 * 3);
+	// u8* full_image_buffer = (u8*) malloc((NUM_IMAGES * (CENTRE_WIDTH) + (NUM_IMAGES-1) * (2 * BLUR_WIDTH - 2)) * 478 * 3);
+	u8* full_image_buffer = (u8*) malloc(FINAL_WIDTH * 480 * 3); // use 480 for easy hdmi dma
 
 	int reset_button_state = 0;
 	int current_image_index = 0;
@@ -682,12 +714,12 @@ int main(void)
 				// Pause camera
 				camera_dma_stop();
 				// Process the image
-				store_image_to_buffer_and_ip_buffer(frame, centre_buffers[current_image_index], edge_ip_input_buffer_left, edge_ip_input_buffer_right, image_processor_output_buffer, edge_result_buffers[current_image_index-1], current_image_index == 0, current_image_index == NUM_IMAGES-1);
+				store_image_to_buffer_and_ip_buffer(frame, edge_ip_input_buffer_left, edge_ip_input_buffer_right, image_processor_output_buffer, current_image_index, full_image_buffer);
 				current_image_index++;
 				previous_angle = current_angle;
 				if (current_image_index == NUM_IMAGES) {
 					// Convert the images to row major order.
-					convert_centres_and_edges_to_row_major(centre_buffers, edge_result_buffers, full_image_buffer);
+					// convert_centres_and_edges_to_row_major(centre_buffers, edge_result_buffers, full_image_buffer);
 					// Don't resume camera, we are done processing images.
 				} else {
 					// Resume camera
