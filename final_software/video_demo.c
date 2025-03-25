@@ -40,6 +40,7 @@
 #include "xil_cache.h"
 #include "xparameters.h"
 #include "sleep.h"
+#include "PmodGYRO.h"
 /*
  * XPAR redefines
  */
@@ -100,6 +101,9 @@ u32* image_processor_input_buffer;
 u32* image_processor_output_buffer;
 #define IMAGE_PROCESSOR_INPUT_BUFFER_SIZE 480 * BLUR_WIDTH * 2 // We send this many pixels each time
 #define IMAGE_PROCESSOR_OUTPUT_BUFFER_SIZE (480-2) * (BLUR_WIDTH * 2 - 2) // We receive this many pixels each time
+
+// Gyro variables
+PmodGYRO gyroDevice;
 
 // #############################################################################################
 // ########################### IIC CONFIG ######################################################
@@ -859,8 +863,27 @@ int image_processor_wait_until_done(){
 // #############################################################################################
 // ################################# Gyro Function #############################################
 // #############################################################################################
+void GyroInitialize() {
+  EnableCaches();
+  GYRO_begin(&gyroDevice, XPAR_PMODGYRO_0_AXI_LITE_SPI_BASEADDR, XPAR_PMODGYRO_0_AXI_LITE_GPIO_BASEADDR);
 
-int delta_angle(); // Reads from gyro and compute the "delta angle" since last call.
+  // Set Threshold Registers
+  GYRO_setThsXH(&gyroDevice, 0x0F);
+  GYRO_setThsYH(&gyroDevice, 0x0F);
+  GYRO_setThsZH(&gyroDevice, 0x0F);
+
+  GYRO_enableInt1(&gyroDevice, GYRO_INT1_XHIE);    // Threshold interrupt
+  GYRO_enableInt2(&gyroDevice, GYRO_REG3_I2_DRDY); // Data Rdy/FIFO interrupt
+} 
+#define THRESHOLD 300
+int delta_angle() {
+	int16_t zAxis = 0;
+	while (GYRO_Int2Status(&myDevice) == 0);
+	zAxis = GYRO_getZ(&myDevice);
+	int z = (int) zAxis;
+	z = (z > THRESHOLD || z < -THRESHOLD) ? z : 0;
+	return z;
+} // Reads from gyro and compute the "delta angle" since last call.
 /* ------------------------------------------------------------ */
 /*				Procedure Definitions							*/
 /* ------------------------------------------------------------ */
@@ -873,6 +896,7 @@ int main(void)
 	HDMIInitialize();
 	camera_dma_init();
 	image_processor_dma_init();
+	GyroInitialize();
 
 	// config the camera
 	camera_config();
@@ -1022,5 +1046,6 @@ int main(void)
 //	for(int f = 0; f < 100; f++){
 //		xil_printf("%x\t\n", frame[f]);
 //	}
+	GYRO_end(&gyroDevice);
 	return 0;
 }
