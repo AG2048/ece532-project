@@ -631,16 +631,6 @@ int main(void)
 	// Frame buffer storing the current camera frame.
 	u8* frame = dispCtrl.framePtr[dispCtrl.curFrame];
 
-	// Define image storage buffers.
-	u8* centre_buffers[NUM_IMAGES];
-	u8* edge_result_buffers[NUM_IMAGES-1];
-	for (int i = 0; i < NUM_IMAGES; i++){
-		centre_buffers[i] = (u8*) malloc(478 * CENTRE_WIDTH * 3);
-	}
-	for (int i = 0; i < NUM_IMAGES-1; i++){
-		edge_result_buffers[i] = (u8*) malloc(478 * (BLUR_WIDTH * 2 - 2) * 3);
-	}
-
 	// Define IP buffers.
 	image_processor_input_buffer = (u32*) malloc(IMAGE_PROCESSOR_INPUT_BUFFER_SIZE * 4); // 4 bytes per pixel
 	image_processor_output_buffer = (u32*) malloc(IMAGE_PROCESSOR_OUTPUT_BUFFER_SIZE * 4); // 4 bytes per pixel
@@ -650,17 +640,21 @@ int main(void)
 	u32* edge_ip_input_buffer_right = image_processor_input_buffer + 480 * BLUR_WIDTH;
 
 	// Define the final output buffer.
-	// u8* full_image_buffer = (u8*) malloc((NUM_IMAGES * (CENTRE_WIDTH) + (NUM_IMAGES-1) * (2 * BLUR_WIDTH - 2)) * 478 * 3);
 	u8* full_image_buffer = (u8*) malloc(FINAL_WIDTH * 480 * 3); // use 480 for easy hdmi dma
 
+	// GPIO buttons
 	int reset_button_state = 0;
+	int left_button_state = 0;
+	int right_button_state = 0;
+
+	// Image index and angle
 	int current_image_index = 0;
-	int started = 0;
 	int previous_angle = 0;
 	int current_angle = 0;
 	int display_col_index = 0;
-	int left_button_state = 0;
-	int right_button_state = 0;
+
+	// Status variables
+	int started = 0;
 
 	int max_col = (NUM_IMAGES * (CENTRE_WIDTH) + (NUM_IMAGES-1) * (2 * BLUR_WIDTH - 2));
 	int angle_difference_threshold = 360 / NUM_IMAGES; // TODO: should be the FOV covered by the centre of the camera.
@@ -668,7 +662,7 @@ int main(void)
 	while (1) {
 		// Read the reset button. If it changed and is now pressed, reset everything
 		int current_button_state = XGpio_DiscreteRead(&BTNInst, 1); // TODO: choose the correct button
-		if (current_button_state != reset_button_state && current_button_state == 1) {
+		if (current_button_state != reset_button_state && current_button_state == 1) { // Rising edge detection
 			// Reset everything
 			current_image_index = 0;
 			started = 1; // indicate that we have started
@@ -678,6 +672,8 @@ int main(void)
 			left_button_state = 0;
 			right_button_state = 0;
 			camera_dma_init(); // Make sure the camera is running
+			// add a small delay to avoid camera read immediately after reset. 
+			usleep(1000000); // 1 s delay
 		}
 		reset_button_state = current_button_state;
 
@@ -701,6 +697,14 @@ int main(void)
 
 			// Display the image
 			display_image_from_start_col(full_image_buffer, frame, display_col_index, max_col);
+		} else if (current_image_index == 0) {
+			// Pause camera
+			camera_dma_stop();
+			// Process the image
+			store_image_to_buffer_and_ip_buffer(frame, edge_ip_input_buffer_left, edge_ip_input_buffer_right, image_processor_output_buffer, current_image_index, full_image_buffer);
+			current_image_index++;
+			// Resume camera
+			camera_dma_init();
 		} else {
 			// Not all images are collected yet, continue processing images.
 
