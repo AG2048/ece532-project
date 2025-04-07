@@ -1,0 +1,1079 @@
+19:21:28 INFO  : Registering command handlers for SDK TCF services
+19:21:28 INFO  : Launching XSCT server: xsct.bat -interactive C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\temp_xsdb_launch_script.tcl
+19:21:30 INFO  : XSCT server has started successfully.
+19:21:32 INFO  : Successfully done setting XSCT server connection channel  
+19:21:32 INFO  : Successfully done setting SDK workspace  
+19:21:32 INFO  : Processing command line option -hwspec C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top.hdf.
+19:23:05 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+19:23:05 INFO  : 'fpga -state' command is executed.
+19:23:05 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+19:23:05 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+19:23:05 INFO  : 'jtag frequency' command is executed.
+19:23:05 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+19:23:05 INFO  : Context for processor 'microblaze_0' is selected.
+19:23:05 INFO  : Processor reset is completed for 'microblaze_0'.
+19:23:05 INFO  : Context for processor 'microblaze_0' is selected.
+19:23:05 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+19:23:05 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+19:23:05 INFO  : Memory regions updated for context PA
+19:23:05 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+19:23:05 INFO  : Context for processor 'microblaze_0' is selected.
+19:23:05 INFO  : 'con' command is executed.
+19:23:05 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+19:23:05 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+19:32:31 INFO  : Disconnected from the channel tcfchan#1.
+19:32:32 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+19:32:32 INFO  : 'fpga -state' command is executed.
+19:32:32 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+19:32:32 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+19:32:32 INFO  : 'jtag frequency' command is executed.
+19:32:32 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+19:32:32 INFO  : Context for processor 'microblaze_0' is selected.
+19:32:32 INFO  : Processor reset is completed for 'microblaze_0'.
+19:32:32 INFO  : Context for processor 'microblaze_0' is selected.
+19:32:32 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+19:32:32 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+19:32:32 INFO  : Memory regions updated for context PA
+19:32:32 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+19:32:32 INFO  : Context for processor 'microblaze_0' is selected.
+19:32:32 INFO  : 'con' command is executed.
+19:32:32 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+19:32:32 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+19:37:27 INFO  : Disconnected from the channel tcfchan#2.
+19:37:28 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+19:37:28 INFO  : 'fpga -state' command is executed.
+19:37:28 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+19:37:28 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+19:37:28 INFO  : 'jtag frequency' command is executed.
+19:37:28 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+19:37:28 INFO  : Context for processor 'microblaze_0' is selected.
+19:37:28 INFO  : Processor reset is completed for 'microblaze_0'.
+19:37:28 INFO  : Context for processor 'microblaze_0' is selected.
+19:37:28 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+19:37:28 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+19:37:28 INFO  : Memory regions updated for context PA
+19:37:28 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+19:37:28 INFO  : Context for processor 'microblaze_0' is selected.
+19:37:28 INFO  : 'con' command is executed.
+19:37:28 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+19:37:28 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+19:38:05 INFO  : Disconnected from the channel tcfchan#3.
+19:38:06 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+19:38:06 INFO  : 'fpga -state' command is executed.
+19:38:06 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+19:38:06 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+19:38:06 INFO  : 'jtag frequency' command is executed.
+19:38:06 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+19:38:06 INFO  : Context for processor 'microblaze_0' is selected.
+19:38:06 INFO  : Processor reset is completed for 'microblaze_0'.
+19:38:06 INFO  : Context for processor 'microblaze_0' is selected.
+19:38:06 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+19:38:06 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+19:38:06 INFO  : Memory regions updated for context PA
+19:38:06 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+19:38:06 INFO  : Context for processor 'microblaze_0' is selected.
+19:38:06 INFO  : 'con' command is executed.
+19:38:06 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+19:38:06 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+19:39:17 INFO  : Disconnected from the channel tcfchan#4.
+19:39:18 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+19:39:18 INFO  : 'fpga -state' command is executed.
+19:39:18 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+19:39:18 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+19:39:18 INFO  : 'jtag frequency' command is executed.
+19:39:18 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+19:39:18 INFO  : Context for processor 'microblaze_0' is selected.
+19:39:18 INFO  : Processor reset is completed for 'microblaze_0'.
+19:39:18 INFO  : Context for processor 'microblaze_0' is selected.
+19:39:18 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+19:39:18 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+19:39:18 INFO  : Memory regions updated for context PA
+19:39:18 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+19:39:18 INFO  : Context for processor 'microblaze_0' is selected.
+19:39:18 INFO  : 'con' command is executed.
+19:39:18 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+19:39:18 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+19:42:43 INFO  : Disconnected from the channel tcfchan#5.
+19:48:24 INFO  : Registering command handlers for SDK TCF services
+19:48:24 INFO  : Launching XSCT server: xsct.bat -interactive C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\temp_xsdb_launch_script.tcl
+19:48:25 INFO  : XSCT server has started successfully.
+19:48:25 INFO  : Successfully done setting XSCT server connection channel  
+19:48:25 INFO  : Successfully done setting SDK workspace  
+19:48:25 INFO  : Processing command line option -hwspec C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top.hdf.
+19:48:25 INFO  : Checking for hwspec changes in the project top_hw_platform_0.
+19:50:49 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+19:50:49 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+19:50:55 INFO  : FPGA configured successfully with bitstream "C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top_hw_platform_0/download.bit"
+19:52:07 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+19:52:07 INFO  : 'fpga -state' command is executed.
+19:52:07 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+19:52:07 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+19:52:07 INFO  : 'jtag frequency' command is executed.
+19:52:07 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+19:52:07 INFO  : Context for processor 'microblaze_0' is selected.
+19:52:07 INFO  : Processor reset is completed for 'microblaze_0'.
+19:52:07 INFO  : Context for processor 'microblaze_0' is selected.
+19:52:07 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+19:52:07 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+19:52:07 INFO  : Memory regions updated for context PA
+19:52:07 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+19:52:07 INFO  : Context for processor 'microblaze_0' is selected.
+19:52:07 INFO  : 'con' command is executed.
+19:52:07 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+19:52:07 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+19:53:14 INFO  : Disconnected from the channel tcfchan#1.
+19:53:15 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+19:53:15 INFO  : 'fpga -state' command is executed.
+19:53:15 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+19:53:15 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+19:53:15 INFO  : 'jtag frequency' command is executed.
+19:53:15 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+19:53:15 INFO  : Context for processor 'microblaze_0' is selected.
+19:53:15 INFO  : Processor reset is completed for 'microblaze_0'.
+19:53:15 INFO  : Context for processor 'microblaze_0' is selected.
+19:53:15 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+19:53:15 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+19:53:16 INFO  : Memory regions updated for context PA
+19:53:16 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+19:53:16 INFO  : Context for processor 'microblaze_0' is selected.
+19:53:16 INFO  : 'con' command is executed.
+19:53:16 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+19:53:16 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+20:38:18 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+20:38:18 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+20:38:23 INFO  : FPGA configured successfully with bitstream "C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top_hw_platform_0/download.bit"
+20:38:31 INFO  : Disconnected from the channel tcfchan#2.
+20:38:32 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+20:38:32 INFO  : 'fpga -state' command is executed.
+20:38:32 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+20:38:32 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+20:38:32 INFO  : 'jtag frequency' command is executed.
+20:38:32 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+20:38:32 INFO  : Context for processor 'microblaze_0' is selected.
+20:38:32 INFO  : Processor reset is completed for 'microblaze_0'.
+20:38:32 INFO  : Context for processor 'microblaze_0' is selected.
+20:38:32 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+20:38:32 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+20:38:32 INFO  : Memory regions updated for context PA
+20:38:32 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+20:38:32 INFO  : Context for processor 'microblaze_0' is selected.
+20:38:32 INFO  : 'con' command is executed.
+20:38:32 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+20:38:32 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+20:41:03 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+20:41:03 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+20:41:08 INFO  : FPGA configured successfully with bitstream "C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top_hw_platform_0/download.bit"
+20:41:46 INFO  : SDK has detected change in the last modified timestamps for source hardware specification file Source:1741567069967,  Project:1741562411521
+20:41:46 INFO  : Project top_hw_platform_0's source hardware specification located at C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top.hdf is now different from the local copy.
+		 The local copy will be replaced with the source specification and your workspace will be updated.
+20:41:58 INFO  : Copied contents of C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top.hdf into \top_hw_platform_0\system.hdf.
+20:41:58 INFO  : Synchronizing projects in the workspace with the hardware platform specification changes.
+20:42:00 INFO  : 
+20:42:01 INFO  : Updating hardware inferred compiler options for HDMI_project.
+20:42:01 INFO  : Clearing existing target manager status.
+20:42:12 INFO  : Disconnected from the channel tcfchan#3.
+20:42:13 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+20:42:13 INFO  : 'fpga -state' command is executed.
+20:42:13 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+20:42:13 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+20:42:13 INFO  : 'jtag frequency' command is executed.
+20:42:13 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+20:42:13 INFO  : Context for processor 'microblaze_0' is selected.
+20:42:13 INFO  : Processor reset is completed for 'microblaze_0'.
+20:42:13 INFO  : Context for processor 'microblaze_0' is selected.
+20:42:14 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+20:42:14 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+20:42:14 INFO  : Memory regions updated for context PA
+20:42:14 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+20:42:14 INFO  : Context for processor 'microblaze_0' is selected.
+20:42:14 INFO  : 'con' command is executed.
+20:42:14 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+20:42:14 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+20:43:18 INFO  : Disconnected from the channel tcfchan#4.
+20:43:19 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+20:43:19 INFO  : 'fpga -state' command is executed.
+20:43:19 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+20:43:19 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+20:43:19 INFO  : 'jtag frequency' command is executed.
+20:43:19 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+20:43:19 INFO  : Context for processor 'microblaze_0' is selected.
+20:43:19 INFO  : Processor reset is completed for 'microblaze_0'.
+20:43:19 INFO  : Context for processor 'microblaze_0' is selected.
+20:43:19 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+20:43:19 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+20:43:19 INFO  : Memory regions updated for context PA
+20:43:19 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+20:43:19 INFO  : Context for processor 'microblaze_0' is selected.
+20:43:19 INFO  : 'con' command is executed.
+20:43:19 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+20:43:19 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+21:45:16 INFO  : Disconnected from the channel tcfchan#5.
+21:45:17 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+21:45:17 INFO  : 'fpga -state' command is executed.
+21:45:17 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+21:45:17 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+21:45:17 INFO  : 'jtag frequency' command is executed.
+21:45:17 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+21:45:17 INFO  : Context for processor 'microblaze_0' is selected.
+21:45:17 INFO  : Processor reset is completed for 'microblaze_0'.
+21:45:17 INFO  : Context for processor 'microblaze_0' is selected.
+21:45:18 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+21:45:18 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+21:45:18 INFO  : Memory regions updated for context PA
+21:45:18 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+21:45:18 INFO  : Context for processor 'microblaze_0' is selected.
+21:45:18 INFO  : 'con' command is executed.
+21:45:18 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+21:45:18 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+22:08:09 INFO  : Disconnected from the channel tcfchan#6.
+22:08:10 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+22:08:10 INFO  : 'fpga -state' command is executed.
+22:08:10 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+22:08:10 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+22:08:10 INFO  : 'jtag frequency' command is executed.
+22:08:10 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+22:08:10 INFO  : Context for processor 'microblaze_0' is selected.
+22:08:10 INFO  : Processor reset is completed for 'microblaze_0'.
+22:08:10 INFO  : Context for processor 'microblaze_0' is selected.
+22:08:11 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+22:08:11 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+22:08:11 INFO  : Memory regions updated for context PA
+22:08:11 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+22:08:11 INFO  : Context for processor 'microblaze_0' is selected.
+22:08:11 INFO  : 'con' command is executed.
+22:08:11 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+22:08:11 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+22:42:55 INFO  : Disconnected from the channel tcfchan#7.
+22:42:56 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+22:42:56 INFO  : 'fpga -state' command is executed.
+22:42:56 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+22:42:56 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+22:42:56 INFO  : 'jtag frequency' command is executed.
+22:42:56 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+22:42:56 INFO  : Context for processor 'microblaze_0' is selected.
+22:42:56 INFO  : Processor reset is completed for 'microblaze_0'.
+22:42:56 INFO  : Context for processor 'microblaze_0' is selected.
+22:42:56 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+22:42:56 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+22:42:56 INFO  : Memory regions updated for context PA
+22:42:56 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+22:42:56 INFO  : Context for processor 'microblaze_0' is selected.
+22:42:56 INFO  : 'con' command is executed.
+22:42:56 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+22:42:56 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+23:16:06 INFO  : Disconnected from the channel tcfchan#8.
+23:16:07 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+23:16:07 INFO  : 'fpga -state' command is executed.
+23:16:07 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+23:16:07 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+23:16:07 INFO  : 'jtag frequency' command is executed.
+23:16:07 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+23:16:07 INFO  : Context for processor 'microblaze_0' is selected.
+23:16:07 INFO  : Processor reset is completed for 'microblaze_0'.
+23:16:07 INFO  : Context for processor 'microblaze_0' is selected.
+23:16:07 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+23:16:07 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+23:16:07 INFO  : Memory regions updated for context PA
+23:16:07 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+23:16:07 INFO  : Context for processor 'microblaze_0' is selected.
+23:16:07 INFO  : 'con' command is executed.
+23:16:07 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+23:16:07 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+23:42:21 INFO  : Disconnected from the channel tcfchan#9.
+23:42:22 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+23:42:22 INFO  : 'fpga -state' command is executed.
+23:42:22 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+23:42:22 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+23:42:22 INFO  : 'jtag frequency' command is executed.
+23:42:22 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+23:42:22 INFO  : Context for processor 'microblaze_0' is selected.
+23:42:22 INFO  : Processor reset is completed for 'microblaze_0'.
+23:42:22 INFO  : Context for processor 'microblaze_0' is selected.
+23:42:22 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+23:42:22 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+23:42:22 INFO  : Memory regions updated for context PA
+23:42:22 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+23:42:22 INFO  : Context for processor 'microblaze_0' is selected.
+23:42:22 INFO  : 'con' command is executed.
+23:42:22 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+23:42:22 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+23:44:24 INFO  : Disconnected from the channel tcfchan#10.
+23:44:25 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+23:44:25 INFO  : 'fpga -state' command is executed.
+23:44:25 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+23:44:25 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+23:44:25 INFO  : 'jtag frequency' command is executed.
+23:44:25 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+23:44:25 INFO  : Context for processor 'microblaze_0' is selected.
+23:44:25 INFO  : Processor reset is completed for 'microblaze_0'.
+23:44:25 INFO  : Context for processor 'microblaze_0' is selected.
+23:44:26 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+23:44:26 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+23:44:26 INFO  : Memory regions updated for context PA
+23:44:26 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+23:44:26 INFO  : Context for processor 'microblaze_0' is selected.
+23:44:26 INFO  : 'con' command is executed.
+23:44:26 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+23:44:26 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+23:45:05 INFO  : Disconnected from the channel tcfchan#11.
+23:45:06 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+23:45:06 INFO  : 'fpga -state' command is executed.
+23:45:06 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+23:45:06 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+23:45:06 INFO  : 'jtag frequency' command is executed.
+23:45:06 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+23:45:06 INFO  : Context for processor 'microblaze_0' is selected.
+23:45:06 INFO  : Processor reset is completed for 'microblaze_0'.
+23:45:06 INFO  : Context for processor 'microblaze_0' is selected.
+23:45:06 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+23:45:06 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+23:45:06 INFO  : Memory regions updated for context PA
+23:45:06 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+23:45:06 INFO  : Context for processor 'microblaze_0' is selected.
+23:45:06 INFO  : 'con' command is executed.
+23:45:06 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+23:45:06 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+23:48:41 INFO  : Disconnected from the channel tcfchan#12.
+23:48:42 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+23:48:42 INFO  : 'fpga -state' command is executed.
+23:48:42 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+23:48:43 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+23:48:43 INFO  : 'jtag frequency' command is executed.
+23:48:43 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+23:48:43 INFO  : Context for processor 'microblaze_0' is selected.
+23:48:43 INFO  : Processor reset is completed for 'microblaze_0'.
+23:48:43 INFO  : Context for processor 'microblaze_0' is selected.
+23:48:43 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+23:48:43 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+23:48:43 INFO  : Memory regions updated for context PA
+23:48:43 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+23:48:43 INFO  : Context for processor 'microblaze_0' is selected.
+23:48:43 INFO  : 'con' command is executed.
+23:48:43 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+23:48:43 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+23:49:44 INFO  : Disconnected from the channel tcfchan#13.
+23:49:45 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+23:49:45 INFO  : 'fpga -state' command is executed.
+23:49:45 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+23:49:45 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+23:49:45 INFO  : 'jtag frequency' command is executed.
+23:49:45 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+23:49:45 INFO  : Context for processor 'microblaze_0' is selected.
+23:49:45 INFO  : Processor reset is completed for 'microblaze_0'.
+23:49:45 INFO  : Context for processor 'microblaze_0' is selected.
+23:49:45 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+23:49:45 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+23:49:45 INFO  : Memory regions updated for context PA
+23:49:45 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+23:49:45 INFO  : Context for processor 'microblaze_0' is selected.
+23:49:45 INFO  : 'con' command is executed.
+23:49:45 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+23:49:45 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+23:52:01 INFO  : Disconnected from the channel tcfchan#14.
+23:52:02 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+23:52:02 INFO  : 'fpga -state' command is executed.
+23:52:02 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+23:52:02 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+23:52:02 INFO  : 'jtag frequency' command is executed.
+23:52:02 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+23:52:02 INFO  : Context for processor 'microblaze_0' is selected.
+23:52:02 INFO  : Processor reset is completed for 'microblaze_0'.
+23:52:02 INFO  : Context for processor 'microblaze_0' is selected.
+23:52:02 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+23:52:02 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+23:52:02 INFO  : Memory regions updated for context PA
+23:52:02 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+23:52:02 INFO  : Context for processor 'microblaze_0' is selected.
+23:52:02 INFO  : 'con' command is executed.
+23:52:02 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+23:52:02 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+00:04:11 INFO  : Disconnected from the channel tcfchan#15.
+00:04:12 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+00:04:12 INFO  : 'fpga -state' command is executed.
+00:04:12 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+00:04:12 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+00:04:12 INFO  : 'jtag frequency' command is executed.
+00:04:12 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+00:04:12 INFO  : Context for processor 'microblaze_0' is selected.
+00:04:12 INFO  : Processor reset is completed for 'microblaze_0'.
+00:04:12 INFO  : Context for processor 'microblaze_0' is selected.
+00:04:12 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+00:04:12 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+00:04:12 INFO  : Memory regions updated for context PA
+00:04:12 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+00:04:12 INFO  : Context for processor 'microblaze_0' is selected.
+00:04:13 INFO  : 'con' command is executed.
+00:04:13 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+00:04:13 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+00:05:25 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+00:05:25 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+00:05:31 INFO  : FPGA configured successfully with bitstream "C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top_hw_platform_0/download.bit"
+00:05:38 INFO  : Disconnected from the channel tcfchan#16.
+00:05:39 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+00:05:39 INFO  : 'fpga -state' command is executed.
+00:05:39 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+00:05:39 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+00:05:39 INFO  : 'jtag frequency' command is executed.
+00:05:39 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+00:05:39 INFO  : Context for processor 'microblaze_0' is selected.
+00:05:39 INFO  : Processor reset is completed for 'microblaze_0'.
+00:05:39 INFO  : Context for processor 'microblaze_0' is selected.
+00:05:40 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+00:05:40 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+00:05:40 INFO  : Memory regions updated for context PA
+00:05:40 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+00:05:40 INFO  : Context for processor 'microblaze_0' is selected.
+00:05:40 INFO  : 'con' command is executed.
+00:05:40 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+00:05:40 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+00:09:13 INFO  : Disconnected from the channel tcfchan#17.
+00:09:14 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+00:09:14 INFO  : 'fpga -state' command is executed.
+00:09:14 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+00:09:15 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+00:09:15 INFO  : 'jtag frequency' command is executed.
+00:09:15 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+00:09:15 INFO  : Context for processor 'microblaze_0' is selected.
+00:09:15 INFO  : Processor reset is completed for 'microblaze_0'.
+00:09:15 INFO  : Context for processor 'microblaze_0' is selected.
+00:09:15 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+00:09:15 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+00:09:15 INFO  : Memory regions updated for context PA
+00:09:15 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+00:09:15 INFO  : Context for processor 'microblaze_0' is selected.
+00:09:15 INFO  : 'con' command is executed.
+00:09:15 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+00:09:15 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+00:09:44 INFO  : Disconnected from the channel tcfchan#18.
+00:09:45 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+00:09:45 INFO  : 'fpga -state' command is executed.
+00:09:45 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+00:09:45 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+00:09:45 INFO  : 'jtag frequency' command is executed.
+00:09:45 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+00:09:45 INFO  : Context for processor 'microblaze_0' is selected.
+00:09:45 INFO  : Processor reset is completed for 'microblaze_0'.
+00:09:45 INFO  : Context for processor 'microblaze_0' is selected.
+00:09:46 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+00:09:46 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+00:09:46 INFO  : Memory regions updated for context PA
+00:09:46 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+00:09:46 INFO  : Context for processor 'microblaze_0' is selected.
+00:09:46 INFO  : 'con' command is executed.
+00:09:46 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+00:09:46 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+00:29:42 INFO  : Disconnected from the channel tcfchan#19.
+00:29:43 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+00:29:43 INFO  : 'fpga -state' command is executed.
+00:29:43 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+00:29:43 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+00:29:43 INFO  : 'jtag frequency' command is executed.
+00:29:43 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+00:29:43 INFO  : Context for processor 'microblaze_0' is selected.
+00:29:43 INFO  : Processor reset is completed for 'microblaze_0'.
+00:29:43 INFO  : Context for processor 'microblaze_0' is selected.
+00:29:43 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+00:29:43 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+00:29:43 INFO  : Memory regions updated for context PA
+00:29:43 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+00:29:43 INFO  : Context for processor 'microblaze_0' is selected.
+00:29:43 INFO  : 'con' command is executed.
+00:29:43 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+00:29:43 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+00:31:20 INFO  : Disconnected from the channel tcfchan#20.
+00:31:22 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+00:31:22 INFO  : 'fpga -state' command is executed.
+00:31:22 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+00:31:22 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+00:31:22 INFO  : 'jtag frequency' command is executed.
+00:31:22 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+00:31:22 INFO  : Context for processor 'microblaze_0' is selected.
+00:31:22 INFO  : Processor reset is completed for 'microblaze_0'.
+00:31:22 INFO  : Context for processor 'microblaze_0' is selected.
+00:31:22 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+00:31:22 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+00:31:22 INFO  : Memory regions updated for context PA
+00:31:22 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+00:31:22 INFO  : Context for processor 'microblaze_0' is selected.
+00:31:22 INFO  : 'con' command is executed.
+00:31:22 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+00:31:22 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+00:51:23 INFO  : Disconnected from the channel tcfchan#21.
+00:51:24 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+00:51:24 INFO  : 'fpga -state' command is executed.
+00:51:24 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+00:51:24 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+00:51:24 INFO  : 'jtag frequency' command is executed.
+00:51:24 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+00:51:24 INFO  : Context for processor 'microblaze_0' is selected.
+00:51:24 INFO  : Processor reset is completed for 'microblaze_0'.
+00:51:24 INFO  : Context for processor 'microblaze_0' is selected.
+00:51:24 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+00:51:24 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+00:51:25 INFO  : Memory regions updated for context PA
+00:51:25 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+00:51:25 INFO  : Context for processor 'microblaze_0' is selected.
+00:51:25 INFO  : 'con' command is executed.
+00:51:25 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+00:51:25 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+00:54:04 INFO  : SDK has detected change in the last modified timestamps for source hardware specification file Source:1741582244432,  Project:1741567069967
+00:54:04 INFO  : Project top_hw_platform_0's source hardware specification located at C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top.hdf is now different from the local copy.
+		 The local copy will be replaced with the source specification and your workspace will be updated.
+00:54:06 INFO  : Copied contents of C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top.hdf into \top_hw_platform_0\system.hdf.
+00:54:06 INFO  : Synchronizing projects in the workspace with the hardware platform specification changes.
+00:54:08 INFO  : 
+00:54:09 INFO  : Updating hardware inferred compiler options for HDMI_project.
+00:54:09 INFO  : Clearing existing target manager status.
+00:55:40 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+00:55:40 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+00:55:46 INFO  : FPGA configured successfully with bitstream "C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top_hw_platform_0/download.bit"
+00:55:53 INFO  : Disconnected from the channel tcfchan#22.
+00:55:54 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+00:55:54 INFO  : 'fpga -state' command is executed.
+00:55:54 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+00:55:54 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+00:55:54 INFO  : 'jtag frequency' command is executed.
+00:55:54 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+00:55:54 INFO  : Context for processor 'microblaze_0' is selected.
+00:55:54 INFO  : Processor reset is completed for 'microblaze_0'.
+00:55:54 INFO  : Context for processor 'microblaze_0' is selected.
+00:55:54 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+00:55:54 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+00:55:54 INFO  : Memory regions updated for context PA
+00:55:54 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+00:55:54 INFO  : Context for processor 'microblaze_0' is selected.
+00:55:54 INFO  : 'con' command is executed.
+00:55:54 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+00:55:54 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+01:15:15 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+01:15:15 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+01:15:20 INFO  : FPGA configured successfully with bitstream "C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top_hw_platform_0/download.bit"
+01:15:28 INFO  : Disconnected from the channel tcfchan#23.
+01:15:29 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+01:15:29 INFO  : 'fpga -state' command is executed.
+01:15:29 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+01:15:29 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+01:15:29 INFO  : 'jtag frequency' command is executed.
+01:15:29 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+01:15:29 INFO  : Context for processor 'microblaze_0' is selected.
+01:15:29 INFO  : Processor reset is completed for 'microblaze_0'.
+01:15:29 INFO  : Context for processor 'microblaze_0' is selected.
+01:15:29 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+01:15:29 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+01:15:29 INFO  : Memory regions updated for context PA
+01:15:29 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+01:15:29 INFO  : Context for processor 'microblaze_0' is selected.
+01:15:29 INFO  : 'con' command is executed.
+01:15:29 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+01:15:29 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+01:17:08 INFO  : Disconnected from the channel tcfchan#24.
+01:17:09 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+01:17:09 INFO  : 'fpga -state' command is executed.
+01:17:09 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+01:17:09 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+01:17:09 INFO  : 'jtag frequency' command is executed.
+01:17:09 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+01:17:09 INFO  : Context for processor 'microblaze_0' is selected.
+01:17:09 INFO  : Processor reset is completed for 'microblaze_0'.
+01:17:09 INFO  : Context for processor 'microblaze_0' is selected.
+01:17:09 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+01:17:09 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+01:17:09 INFO  : Memory regions updated for context PA
+01:17:09 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+01:17:09 INFO  : Context for processor 'microblaze_0' is selected.
+01:17:09 INFO  : 'con' command is executed.
+01:17:09 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+01:17:09 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+01:34:47 INFO  : Disconnected from the channel tcfchan#25.
+01:34:48 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+01:34:48 INFO  : 'fpga -state' command is executed.
+01:34:48 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+01:34:48 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+01:34:48 INFO  : 'jtag frequency' command is executed.
+01:34:48 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+01:34:48 INFO  : Context for processor 'microblaze_0' is selected.
+01:34:48 INFO  : Processor reset is completed for 'microblaze_0'.
+01:34:48 INFO  : Context for processor 'microblaze_0' is selected.
+01:34:48 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+01:34:48 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+01:34:48 INFO  : Memory regions updated for context PA
+01:34:48 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+01:34:48 INFO  : Context for processor 'microblaze_0' is selected.
+01:34:48 INFO  : 'con' command is executed.
+01:34:48 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+01:34:48 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+02:24:50 INFO  : Disconnected from the channel tcfchan#26.
+02:24:51 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Nexys Video 210276724109B" && level==0} -index 0' command is executed.
+02:24:51 INFO  : 'fpga -state' command is executed.
+02:24:51 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+02:24:52 INFO  : Jtag cable 'Digilent Nexys Video 210276724109B' is selected.
+02:24:52 INFO  : 'jtag frequency' command is executed.
+02:24:52 INFO  : 'configparams mdm-detect-bscan-mask 2' command is executed.
+02:24:52 INFO  : Context for processor 'microblaze_0' is selected.
+02:24:52 INFO  : Processor reset is completed for 'microblaze_0'.
+02:24:52 INFO  : Context for processor 'microblaze_0' is selected.
+02:24:52 INFO  : The application 'C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf' is downloaded to processor 'microblaze_0'.
+02:24:52 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+configparams mdm-detect-bscan-mask 2
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+rst -processor
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+dow C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/HDMI_project/Debug/HDMI_project.elf
+----------------End of Script----------------
+
+02:24:52 INFO  : Memory regions updated for context PA
+02:24:52 INFO  : Memory regions updated for context MicroBlaze Debug Module at USER2
+02:24:52 INFO  : Context for processor 'microblaze_0' is selected.
+02:24:52 INFO  : 'con' command is executed.
+02:24:52 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "microblaze*#0" && bscan=="USER2"  && jtag_cable_name =~ "Digilent Nexys Video 210276724109B"} -index 0
+con
+----------------End of Script----------------
+
+02:24:52 INFO  : Launch script is exported to file 'C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\.sdk\launch_scripts\xilinx_c-c++_application_(system_debugger)\system_debugger_using_debug_hdmi_project.elf_on_local.tcl'
+02:26:08 INFO  : Disconnected from the channel tcfchan#27.
+23:14:15 INFO  : Registering command handlers for SDK TCF services
+23:14:15 INFO  : Launching XSCT server: xsct.bat -interactive C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\temp_xsdb_launch_script.tcl
+23:14:17 INFO  : XSCT server has started successfully.
+23:14:17 INFO  : Successfully done setting XSCT server connection channel  
+23:14:19 INFO  : Successfully done setting SDK workspace  
+23:14:19 INFO  : Processing command line option -hwspec C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top.hdf.
+23:14:19 INFO  : Checking for hwspec changes in the project top_hw_platform_0.
+23:14:21 INFO  : SDK has detected change in the last modified timestamps for source hardware specification file Source:1741662797837,  Project:1741582244432
+23:14:21 INFO  : The hardware specification for project 'top_hw_platform_0' is different from C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top.hdf.
+23:14:21 INFO  : Copied contents of C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top.hdf into \top_hw_platform_0\system.hdf.
+23:14:21 INFO  : Synchronizing projects in the workspace with the hardware platform specification changes.
+23:14:23 INFO  : 
+23:14:24 INFO  : Updating hardware inferred compiler options for HDMI_project.
+23:14:24 INFO  : Clearing existing target manager status.
+23:18:03 INFO  : Registering command handlers for SDK TCF services
+23:18:03 INFO  : Launching XSCT server: xsct.bat -interactive C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\temp_xsdb_launch_script.tcl
+23:18:04 INFO  : XSCT server has started successfully.
+23:18:04 INFO  : Successfully done setting XSCT server connection channel  
+23:18:04 INFO  : Successfully done setting SDK workspace  
+23:18:04 INFO  : Processing command line option -hwspec C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top.hdf.
+23:18:04 INFO  : Checking for hwspec changes in the project top_hw_platform_0.
+10:48:22 INFO  : Registering command handlers for SDK TCF services
+10:48:22 INFO  : Launching XSCT server: xsct.bat -interactive C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\temp_xsdb_launch_script.tcl
+10:48:23 INFO  : XSCT server has started successfully.
+10:48:23 INFO  : Successfully done setting XSCT server connection channel  
+10:48:23 INFO  : Successfully done setting SDK workspace  
+10:48:23 INFO  : Processing command line option -hwspec C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top.hdf.
+10:48:23 INFO  : Checking for hwspec changes in the project top_hw_platform_0.
+10:48:24 INFO  : SDK has detected change in the last modified timestamps for source hardware specification file Source:1742222503787,  Project:1741662797837
+10:48:24 INFO  : The hardware specification for project 'top_hw_platform_0' is different from C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top.hdf.
+10:48:24 INFO  : Copied contents of C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top.hdf into \top_hw_platform_0\system.hdf.
+10:48:24 INFO  : Synchronizing projects in the workspace with the hardware platform specification changes.
+10:48:26 INFO  : 
+10:48:27 INFO  : Updating hardware inferred compiler options for HDMI_project.
+10:48:27 INFO  : Clearing existing target manager status.
+19:03:46 INFO  : SDK has detected change in the last modified timestamps for source hardware specification file Source:1742252460391,  Project:1742222503787
+19:03:46 INFO  : Project top_hw_platform_0's source hardware specification located at C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top.hdf is now different from the local copy.
+		 The local copy will be replaced with the source specification and your workspace will be updated.
+19:03:58 INFO  : Copied contents of C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top.hdf into \top_hw_platform_0\system.hdf.
+19:03:59 INFO  : Synchronizing projects in the workspace with the hardware platform specification changes.
+19:04:00 INFO  : 
+19:04:01 INFO  : Updating hardware inferred compiler options for HDMI_project.
+19:04:01 INFO  : Clearing existing target manager status.
+19:41:13 INFO  : Registering command handlers for SDK TCF services
+19:41:14 INFO  : Launching XSCT server: xsct.bat -interactive C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\temp_xsdb_launch_script.tcl
+19:41:16 INFO  : XSCT server has started successfully.
+19:41:16 INFO  : Successfully done setting XSCT server connection channel  
+19:41:17 INFO  : Successfully done setting SDK workspace  
+19:41:17 INFO  : Processing command line option -hwspec C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top.hdf.
+19:41:17 INFO  : Checking for hwspec changes in the project top_hw_platform_0.
+14:35:18 INFO  : Registering command handlers for SDK TCF services
+14:35:19 INFO  : Launching XSCT server: xsct.bat -interactive C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\temp_xsdb_launch_script.tcl
+14:35:21 INFO  : XSCT server has started successfully.
+14:35:23 INFO  : Successfully done setting XSCT server connection channel  
+14:35:23 INFO  : Successfully done setting SDK workspace  
+14:35:23 INFO  : Processing command line option -hwspec C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top.hdf.
+14:39:48 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+14:40:10 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+23:16:16 INFO  : Launching XSCT server: xsct.bat -interactive C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.sdk\temp_xsdb_launch_script.tcl
+23:16:18 INFO  : XSCT server has started successfully.
+23:16:18 INFO  : Successfully done setting XSCT server connection channel  
+23:16:22 INFO  : Successfully done setting SDK workspace  
+23:16:23 INFO  : Registering command handlers for SDK TCF services
+23:16:24 INFO  : Processing command line option -hwspec C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top.hdf.
+23:16:24 INFO  : Checking for hwspec changes in the project top_hw_platform_0.
+23:16:24 INFO  : SDK has detected change in the last modified timestamps for source hardware specification file Source:1742264574000,  Project:1742264574206
+23:16:24 INFO  : The hardware specification for project 'top_hw_platform_0' is different from C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top.hdf.
+23:16:24 INFO  : Copied contents of C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/top.hdf into \top_hw_platform_0\system.hdf.
+23:16:26 INFO  : Synchronizing projects in the workspace with the hardware platform specification changes.
+23:16:26 INFO  : Clearing existing target manager status.
+23:16:26 INFO  : Workspace synchronized with the new hardware specification file. Cleaning dependent projects...
+23:16:26 WARN  : Linker script will not be updated automatically. Users need to update it manually.

@@ -1,0 +1,12 @@
+#-----------------------------------------------------------
+# Webtalk v2018.3 (64-bit)
+# SW Build 2405991 on Thu Dec  6 23:38:27 MST 2018
+# 
+# Start of session at: Sun Mar  9 19:42:43 2025
+# Process ID: 6368
+# Current directory: C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/webtalk
+# Command line: wbtcv.exe -mode batch -source sdk_webtalk.tcl
+# Log file: C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/webtalk/webtalk.log
+# Journal file: C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.sdk/webtalk\webtalk.jou
+#-----------------------------------------------------------
+source sdk_webtalk.tcl

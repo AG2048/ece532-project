@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="C:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.hw/hw_1/wave/hw_ila_data_2/hw_ila_data_2.wdb" id="1">
+         <top_modules>
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="0fs"></ZoomStartTime>
+      <ZoomEndTime time="19248fs"></ZoomEndTime>
+      <Cursor1Time time="0fs"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="541"></NameColumnWidth>
+      <ValueColumnWidth column_width="521"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="6" />
+   <wvobject fp_name="hdi_top/hdmi_i/dvi2rgb_0/U0/dbg_rDlyRst" type="logic">
+      <obj_property name="DisplayName">FullPathName</obj_property>
+      <obj_property name="ElementShortName">hdi_top/hdmi_i/dvi2rgb_0/U0/dbg_rDlyRst</obj_property>
+      <obj_property name="ObjectShortName">dbg_rDlyRst</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+      <obj_property name="LABELRADIX">true</obj_property>
+      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
+   </wvobject>
+   <wvobject fp_name="hdi_top/hdmi_i/dvi2rgb_0/U0/dbg_rRdyRst" type="logic">
+      <obj_property name="DisplayName">FullPathName</obj_property>
+      <obj_property name="ElementShortName">hdi_top/hdmi_i/dvi2rgb_0/U0/dbg_rRdyRst</obj_property>
+      <obj_property name="ObjectShortName">dbg_rRdyRst</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+      <obj_property name="LABELRADIX">true</obj_property>
+      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
+   </wvobject>
+   <wvobject fp_name="hdi_top/hdmi_i/dvi2rgb_0/U0/dbg_rMMCM_Reset" type="logic">
+      <obj_property name="DisplayName">FullPathName</obj_property>
+      <obj_property name="ElementShortName">hdi_top/hdmi_i/dvi2rgb_0/U0/dbg_rMMCM_Reset</obj_property>
+      <obj_property name="ObjectShortName">dbg_rMMCM_Reset</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+      <obj_property name="LABELRADIX">true</obj_property>
+      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
+   </wvobject>
+   <wvobject fp_name="hdi_top/hdmi_i/dvi2rgb_0/U0/dbg_rBUFR_Rst" type="logic">
+      <obj_property name="DisplayName">FullPathName</obj_property>
+      <obj_property name="ElementShortName">hdi_top/hdmi_i/dvi2rgb_0/U0/dbg_rBUFR_Rst</obj_property>
+      <obj_property name="ObjectShortName">dbg_rBUFR_Rst</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+      <obj_property name="LABELRADIX">true</obj_property>
+      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
+   </wvobject>
+   <wvobject fp_name="hdi_top/hdmi_i/dvi2rgb_0/U0/dbg_rMMCM_Locked" type="logic">
+      <obj_property name="DisplayName">FullPathName</obj_property>
+      <obj_property name="ElementShortName">hdi_top/hdmi_i/dvi2rgb_0/U0/dbg_rMMCM_Locked</obj_property>
+      <obj_property name="ObjectShortName">dbg_rMMCM_Locked</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+      <obj_property name="LABELRADIX">true</obj_property>
+      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
+   </wvobject>
+   <wvobject fp_name="hdi_top/hdmi_i/dvi2rgb_0/U0/dbg_Clocking_aLocked" type="logic">
+      <obj_property name="DisplayName">FullPathName</obj_property>
+      <obj_property name="ElementShortName">hdi_top/hdmi_i/dvi2rgb_0/U0/dbg_Clocking_aLocked</obj_property>
+      <obj_property name="ObjectShortName">dbg_Clocking_aLocked</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+      <obj_property name="LABELRADIX">true</obj_property>
+      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
+   </wvobject>
+</wave_config>

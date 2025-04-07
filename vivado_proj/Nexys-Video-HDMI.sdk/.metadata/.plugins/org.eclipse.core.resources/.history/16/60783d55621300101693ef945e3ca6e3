@@ -1,0 +1,955 @@
+/************************************************************************/
+/*																		*/
+/*	video_demo.c	--	Nexys Video HDMI demonstration 						*/
+/*																		*/
+/************************************************************************/
+/*	Author: Sam Bobrowicz												*/
+/*	Copyright 2015, Digilent Inc.										*/
+/************************************************************************/
+/*  Module Description: 												*/
+/*																		*/
+/*		This file contains code for running a demonstration of the		*/
+/*		Video input and output capabilities on the Nexys Video. It is a good	*/
+/*		example of how to properly use the display_ctrl and				*/
+/*		video_capture drivers.											*/
+/*																		*/
+/*																		*/
+/************************************************************************/
+/*  Revision History:													*/
+/* 																		*/
+/*		11/25/2015(SamB): Created										*/
+/*		03/31/2017(ArtVVB): Updated sleep functions for 2016.4			*/
+/*																		*/
+/************************************************************************/
+
+/* ------------------------------------------------------------ */
+/*				Include File Definitions						*/
+/* ------------------------------------------------------------ */
+
+#include "video_demo.h"
+#include "video_capture/video_capture.h"
+#include "display_ctrl/display_ctrl.h"
+#include "intc/intc.h"
+#include <stdio.h>
+#include "xuartlite_l.h"
+//#include "xuartps.h"
+#include "math.h"
+#include <ctype.h>
+#include <stdlib.h>
+#include "xil_types.h"
+#include "xil_cache.h"
+#include "xparameters.h"
+#include "sleep.h"
+#include "PmodGYRO.h"
+#include "xaxidma.h"
+#include "xiic.h"
+/*
+ * XPAR redefines
+ */
+#define DYNCLK_BASEADDR XPAR_AXI_DYNCLK_0_BASEADDR
+#define VGA_VDMA_ID XPAR_AXIVDMA_0_DEVICE_ID
+#define DISP_VTC_ID XPAR_VTC_0_DEVICE_ID
+#define VID_VTC_ID XPAR_VTC_1_DEVICE_ID
+#define VID_GPIO_ID XPAR_AXI_GPIO_VIDEO_DEVICE_ID
+#define VID_VTC_IRPT_ID XPAR_INTC_0_VTC_1_VEC_ID
+#define SCU_TIMER_ID XPAR_AXI_TIMER_0_DEVICE_ID
+#define UART_BASEADDR XPAR_UARTLITE_0_BASEADDR
+
+/*
+ * Image processing defines
+ */
+#define FILTER_WIDTH 3 // the image processor has a 3x3 filter.
+#define START_COLUMN_INDEX 120 // the column index to start processing the image.
+#define END_COLUMN_INDEX 520 // the column index to end processing the image. (exclusive)
+#define BLUR_WIDTH 20 // How many pixels from each side to blur.
+#define CENTRE_WIDTH (END_COLUMN_INDEX - START_COLUMN_INDEX - 2*BLUR_WIDTH + 2) // The width of the centre image. (extends 2 pixels into the blur region, due to blur being 1 pixel less on each side)
+#define EDGE_WIDTH (2*BLUR_WIDTH - 2) // The width of the edge image. (the blur region)
+#define NUM_IMAGES 10 // The number of images to process.
+#define FINAL_WIDTH (NUM_IMAGES * CENTRE_WIDTH + (NUM_IMAGES-1) * EDGE_WIDTH) // The final width of the image.
+
+/* ------------------------------------------------------------ */
+/*				Global Variables								*/
+/* ------------------------------------------------------------ */
+XGpio BTNInst;
+/*
+ * Display and Video Driver structs
+ */
+DisplayCtrl dispCtrl;
+XAxiVdma vdma;
+VideoCapture videoCapt;
+INTC intc;
+char fRefresh; //flag used to trigger a refresh of the Menu on video detect
+
+/*
+ * Framebuffers for video data (3 frames buffer) (define buffer array for 1920*1080*3 screen. )
+ */
+u8 frameBuf[DISPLAY_NUM_FRAMES][DEMO_MAX_FRAME];
+u8 *pFrames[DISPLAY_NUM_FRAMES]; //array of pointers to the frame buffers
+
+/*
+ * Interrupt vector table. Contains pointers to the handlers for the core interrupts.
+ */
+const ivt_t ivt[] = {
+	videoVtcIvt(VID_VTC_IRPT_ID, &(videoCapt.vtc))
+};
+
+/*
+ * Image processor dma and buffer variables.
+ */
+XAxiDma AxiDma;
+u32* image_processor_input_buffer;
+u32* image_processor_output_buffer;
+#define IMAGE_PROCESSOR_INPUT_BUFFER_SIZE 480 * BLUR_WIDTH * 2 // We send this many pixels each time
+#define IMAGE_PROCESSOR_OUTPUT_BUFFER_SIZE (480-2) * (BLUR_WIDTH * 2 - 2) // We receive this many pixels each time
+
+// Gyro variables
+PmodGYRO gyroDevice;
+
+// #############################################################################################
+// ########################### IIC CONFIG ######################################################
+// ########################
+//#####################################################################
+#define OV7670_I2C_ADDR 0x42>>1
+XIic IicInstance;
+typedef struct {
+    u8 reg;
+    u8 val;
+} ov7670_reg_t;
+ov7670_reg_t ov7670_init_regs[] = {
+		{0x12, 0x04},
+		{0x40, 0xD0},
+		{0x3A, 0x04},
+		{0x3D, 0xC8},
+		{0x1E, 0x31},
+		{0x6B, 0x00},
+		{0x32, 0xB6},
+		{0x17, 0x13},
+		{0x18, 0x01},
+		{0x19, 0x02},
+		{0x1A, 0x7A},
+		{0x03, 0x0A},
+		{0x0C, 0x00},
+		{0x3E, 0x00},
+		{0x70, 0x00},
+		{0x71, 0x00},
+		{0x72, 0x11},
+		{0x73, 0x00},
+		{0xA2, 0x02},
+		{0x11, 0x80},
+		{0x7A, 0x20},
+		{0x7B, 0x1C},
+		{0x7C, 0x28},
+		{0x7D, 0x3C},
+		{0x7E, 0x55},
+		{0x7F, 0x68},
+		{0x80, 0x76},
+		{0x81, 0x80},
+		{0x82, 0x88},
+		{0x83, 0x8F},
+		{0x84, 0x96},
+		{0x85, 0xA3},
+		{0x86, 0xAF},
+		{0x87, 0xC4},
+		{0x88, 0xD7},
+		{0x89, 0xE8},
+		{0x13, 0xE0},
+		{0x00, 0x00},
+		{0x10, 0x00},
+		{0x0D, 0x00},
+		{0x14, 0x28},
+		{0xA5, 0x05},
+		{0xAB, 0x07},
+		{0x24, 0x75},
+		{0x25, 0x63},
+		{0x26, 0xA5},
+		{0x9F, 0x78},
+		{0xA0, 0x68},
+		{0xA1, 0x03},
+		{0xA6, 0xDF},
+		{0xA7, 0xDF},
+		{0xA8, 0xF0},
+		{0xA9, 0x90},
+		{0xAA, 0x94},
+		{0x13, 0xEF},
+		{0x0E, 0x61},
+		{0x0F, 0x4B},
+		{0x16, 0x02},
+		{0x21, 0x02},
+		{0x22, 0x91},
+		{0x29, 0x07},
+		{0x33, 0x0B},
+		{0x35, 0x0B},
+		{0x37, 0x1D},
+		{0x38, 0x71},
+		{0x39, 0x2A},
+		{0x3C, 0x78},
+		{0x4D, 0x40},
+		{0x4E, 0x20},
+		{0x69, 0x0C},
+		{0x74, 0x19},
+		{0x8D, 0x4F},
+		{0x8E, 0x00},
+		{0x8F, 0x00},
+		{0x90, 0x00},
+		{0x91, 0x00},
+		{0x92, 0x00},
+		{0x96, 0x00},
+		{0x9A, 0x80},
+		{0xB0, 0x84},
+		{0xB1, 0x0C},
+		{0xB2, 0x0E},
+		{0xB3, 0x82},
+		{0xB8, 0x0A},
+		{0x43, 0x14},
+		{0x44, 0xF0},
+		{0x45, 0x34},
+		{0x46, 0x58},
+		{0x47, 0x28},
+		{0x48, 0x3A},
+		{0x59, 0x88},
+		{0x5A, 0x88},
+		{0x5B, 0x44},
+		{0x5C, 0x67},
+		{0x5D, 0x49},
+		{0x5E, 0x0E},
+		{0x64, 0x04},
+		{0x65, 0x20},
+		{0x66, 0x05},
+		{0x94, 0x04},
+		{0x95, 0x08},
+		{0x6C, 0x0A},
+		{0x6D, 0x55},
+		{0x6E, 0x11},
+		{0x6F, 0x9F},
+		{0x6A, 0x40},
+		{0x01, 0x40},
+		{0x02, 0x40},
+		{0x13, 0xE7},
+		{0x15, 0x00},
+		{0x4F, 0x80},
+		{0x50, 0x80},
+		{0x51, 0x00},
+		{0x52, 0x22},
+		{0x53, 0x5E},
+		{0x54, 0x80},
+		{0x58, 0x9E},
+		{0x41, 0x08},
+		{0x3F, 0x00},
+		{0x75, 0x05},
+		{0x76, 0xE1},
+		{0x4C, 0x00},
+		{0x77, 0x01},
+		{0x4B, 0x09},
+		{0xC9, 0x00},
+		{0x41, 0x38},
+		{0x56, 0x40},
+		{0x34, 0x11},
+		{0x3B, 0x02},
+		{0xA4, 0x89},
+		{0x96, 0x00},
+		{0x97, 0x30},
+		{0x98, 0x20},
+		{0x99, 0x30},
+		{0x9A, 0x84},
+		{0x9B, 0x29},
+		{0x9C, 0x03},
+		{0x9D, 0x4C},
+		{0x9E, 0x3F},
+		{0x78, 0x04},
+		{0x79, 0x01},
+		{0xC8, 0xF0},
+		{0x79, 0x0F},
+		{0xC8, 0x00},
+		{0x79, 0x10},
+		{0xC8, 0x7E},
+		{0x79, 0x0A},
+		{0xC8, 0x80},
+		{0x79, 0x0B},
+		{0xC8, 0x01},
+		{0x79, 0x0C},
+		{0xC8, 0x0F},
+		{0x79, 0x0D},
+		{0xC8, 0x20},
+		{0x79, 0x09},
+		{0xC8, 0x80},
+		{0x79, 0x02},
+		{0xC8, 0xC0},
+		{0x79, 0x03},
+		{0xC8, 0x40},
+		{0x79, 0x05},
+		{0xC8, 0x30},
+		{0x79, 0x26},
+		{0x09, 0x03},
+		{0x3B, 0x42},
+		{0x8C, 0x02},
+
+	    {0xFF, 0xFF}  // End marker
+
+};
+
+int ov7670_write_reg(u8 reg, u8 val) {
+    u8 WriteBuffer[2];
+    int Status;
+
+    WriteBuffer[0] = reg;
+    WriteBuffer[1] = val;
+
+    /* XIic_Send sends the data over I2C.
+       The function returns the number of bytes transmitted. */
+    Status = XIic_Send(IicInstance.BaseAddress, OV7670_I2C_ADDR,
+                         WriteBuffer, 2, XIIC_STOP);
+    if (Status != 2) {
+        xil_printf("I2C Write failed for reg 0x%02x\n", reg);
+        return XST_FAILURE;
+    }
+
+    /* Wait until the I2C bus is idle before proceeding */
+    while (XIic_IsIicBusy(IicInstance.BaseAddress));
+    return XST_SUCCESS;
+}
+
+int camera_config() {
+
+	XIic_Config *Config;
+	int Status;
+
+	/* Look up the configuration for the AXI I2C device.
+	   Make sure XPAR_AXI_IIC_0_DEVICE_ID matches your system s configuration. */
+	Config = XIic_LookupConfig(XPAR_AXI_IIC_0_DEVICE_ID);
+	if (Config == NULL) {
+		xil_printf("Error: No config found for AXI I2C\n");
+		return XST_FAILURE;
+	}
+
+	Status = XIic_CfgInitialize(&IicInstance, Config, Config->BaseAddress);
+	if (Status != XST_SUCCESS) {
+		xil_printf("Error: I2C initialization failed\n");
+		return Status;
+	}
+
+	XIic_Start(&IicInstance);  // Start the I2C interface
+
+	int i = 0;
+	while (ov7670_init_regs[i].reg != 0xFF) {
+		Status = ov7670_write_reg(ov7670_init_regs[i].reg,
+								  ov7670_init_regs[i].val);
+
+		if (Status != XST_SUCCESS) {
+			xil_printf("Failed to write register 0x%02x\n", ov7670_init_regs[i].reg);
+			return Status;
+		}
+		/* Optional delay to allow the sensor to process the new setting */
+		usleep(1000);
+		i++;
+	}
+
+	xil_printf("OV7670 configuration complete.\n");
+
+	return XST_SUCCESS;
+}
+
+
+// #############################################################################################
+// ########################### Camera DMA Functions ############################################
+// #############################################################################################
+
+ void camera_dma_init(){
+	int currentFrame = dispCtrl.curFrame;
+	int Status;
+	XAxiVdma AxiVdma;
+	XAxiVdma_Config *Config;
+	XAxiVdma_DmaSetup WriteCfg;
+
+	// Get Hardware VDMA Config from device ID
+	Config = XAxiVdma_LookupConfig(XPAR_AXI_VDMA_1_DEVICE_ID);
+	// Initialize the VDMA
+	Status = XAxiVdma_CfgInitialize(&AxiVdma, Config, Config->BaseAddress);
+	if (Status != XST_SUCCESS) {
+	  xil_printf("Camera Cfg init failed %d\r\n", Status);
+	}
+
+	// Define a DMA Transfer Configuration
+	WriteCfg.VertSizeInput = 480;
+	WriteCfg.HoriSizeInput = 640 * 3; // 640 pixels by 4 bytes per pixel
+	WriteCfg.Stride = DEMO_STRIDE;
+	WriteCfg.FrameDelay = 0;
+	WriteCfg.PointNum = 0;
+	WriteCfg.EnableFrameCounter = 0;
+	WriteCfg.EnableCircularBuf = 1;
+	WriteCfg.EnableSync = 0;
+	WriteCfg.FixedFrameStoreAddr = currentFrame;
+
+	//WriteCfg.FrameStoreStartAddr[0] = (u32) framePtr[0];
+	for (int i = 0; i < DISPLAY_NUM_FRAMES; i++) {
+		WriteCfg.FrameStoreStartAddr[i] = (u32) pFrames[i];
+	}
+
+	// Apply the write transfer config
+	Status = XAxiVdma_DmaConfig(&AxiVdma, XAXIVDMA_WRITE, &WriteCfg);
+	if (Status != XST_SUCCESS) {
+	  xil_printf("Write channel config failed %d\r\n", Status);
+	}
+
+	// Set the destination address to be the base address of DDR memory
+	// same location as the AXI TFT
+	Status = XAxiVdma_DmaSetBufferAddr(&AxiVdma, XAXIVDMA_WRITE, WriteCfg.FrameStoreStartAddr);
+	if (Status != XST_SUCCESS) {
+	  xil_printf("Write channel set buffer address failed %d\r\n", Status);
+	}
+	Status = XAxiVdma_DmaStart(&AxiVdma, XAXIVDMA_WRITE);
+	if (Status != XST_SUCCESS) {
+	  xil_printf("Start Write transfer failed %d\r\n", Status);
+	}
+	Status = XAxiVdma_StartParking(&AxiVdma, currentFrame, XAXIVDMA_WRITE);
+	if (Status != XST_SUCCESS) {
+	  xil_printf("Unable to park the Write channel %d\r\n", Status);
+	}
+}
+void camera_dma_stop() {
+  // Tell the VDMA core to stop reading from Camera (used if we want to extract current frame)
+	int Status;
+	XAxiVdma AxiVdma;
+	XAxiVdma_Config *Config;
+
+	// Get Hardware VDMA Config from device ID
+	Config = XAxiVdma_LookupConfig(XPAR_AXI_VDMA_1_DEVICE_ID);
+	// Initialize the VDMA
+	Status = XAxiVdma_CfgInitialize(&AxiVdma, Config, Config->BaseAddress);
+
+	// Stop the VDMA Core
+	XAxiVdma_DmaStop(&AxiVdma, XAXIVDMA_READ);
+	while(XAxiVdma_IsBusy(&AxiVdma, XAXIVDMA_READ));
+
+	if (XAxiVdma_GetDmaChannelErrors(&AxiVdma, XAXIVDMA_READ))
+	{
+		xil_printf("Clearing DMA errors...\r\n");
+		XAxiVdma_ClearDmaChannelErrors(&AxiVdma, XAXIVDMA_READ, 0xFFFFFFFF);
+	}
+}
+void camera_dma_change_frame(u32 frameIndex) {
+  // Tell camera dma to write to a different one of the frame buffers for HDMI output
+	int Status;
+	XAxiVdma AxiVdma;
+	XAxiVdma_Config *Config;
+
+	// Get Hardware VDMA Config from device ID
+	Config = XAxiVdma_LookupConfig(XPAR_AXI_VDMA_1_DEVICE_ID);
+	// Initialize the VDMA
+	Status = XAxiVdma_CfgInitialize(&AxiVdma, Config, Config->BaseAddress);
+
+	Status = XAxiVdma_StartParking(&AxiVdma, frameIndex, XAXIVDMA_WRITE);
+	if (Status != XST_SUCCESS) {
+		xil_printf("Cannot change frame, unable to start parking %d\r\n", Status);
+	}
+}
+
+// #############################################################################################
+// ################################# HDMI Functions ############################################
+// #############################################################################################
+
+void HDMIInitialize()
+{
+  /*
+   * Tell the HDMI where to read the frame data from, and repeat this for all frames
+   */
+	int Status;
+	XAxiVdma_Config *vdmaConfig;
+	int i;
+
+	/*
+	 * Initialize an array of pointers to the 3 frame buffers
+	 */
+	for (i = 0; i < DISPLAY_NUM_FRAMES; i++)
+	{
+		pFrames[i] = frameBuf[i];
+	}
+
+	/*
+	 * Initialize VDMA driver
+	 */
+	vdmaConfig = XAxiVdma_LookupConfig(VGA_VDMA_ID); // Find config
+	if (!vdmaConfig)
+	{
+		xil_printf("No video DMA found for ID %d\r\n", VGA_VDMA_ID);
+		return;
+	}
+	Status = XAxiVdma_CfgInitialize(&vdma, vdmaConfig, vdmaConfig->BaseAddress); // Initialize driver
+	if (Status != XST_SUCCESS)
+	{
+		xil_printf("VDMA Configuration Initialization failed %d\r\n", Status);
+		return;
+	}
+
+	/*
+	 * Initialize the Display controller and start it
+	 */
+	Status = DisplayInitialize(&dispCtrl, &vdma, DISP_VTC_ID, DYNCLK_BASEADDR, pFrames, DEMO_STRIDE); // Initialize display
+	if (Status != XST_SUCCESS)
+	{
+		xil_printf("Display Ctrl initialization failed during demo initialization%d\r\n", Status);
+		return;
+	}
+	Status = DisplayStart(&dispCtrl);
+	if (Status != XST_SUCCESS)
+	{
+		xil_printf("Couldn't start display during demo initialization%d\r\n", Status);
+		return;
+	}
+
+	return;
+}
+
+void HDMIISR(void *callBackRef, void *pVideo)
+{
+	char *data = (char *) callBackRef;
+	*data = 1; //set fRefresh to 1
+}
+
+// #############################################################################################
+// ################################# Image Processing Functions ################################
+// #############################################################################################
+
+/*
+1. Read specific columns of the image to a buffer. (to extract border columns for processor to use)
+2. Store columns of an image to a large buffer, with rooms left for the border columns after processor.
+3. From the large final image buffer, send specific columns of image to the HDMI output (controlled by button)
+
+For each image, declare a buffer of size: SCAN_WIDTH * 478 * 3 (because 2 rows are used for border...)
+(to be strict, should be 480 - (filter_size // 2))
+row major order.
+
+
+####### ################################################################
+####### ################################################################
+####### ################################################################
+####### ################################################################
+####### ################################################################
+####### ################################################################
+####### ################################################################
+####### ################################################################
+####### ################################################################
+*/
+
+void store_image_to_buffer_and_ip_buffer(u8* in_buffer, u32* edge_ip_input_buffer_left, u32* edge_ip_input_buffer_right, u32* edge_ip_output_buffer, int current_image_index, u8* full_image_buffer){
+  int is_first = current_image_index == 0;
+  int is_last = current_image_index == NUM_IMAGES - 1;
+  // From input buffer of size 1920*1080*3, which only contains 640*480*3 image,
+  // store the image from START_COLUMN_INDEX + BLUR_WIDTH - 1 to END_COLUMN_INDEX - BLUR_WIDTH + 1 (exclusive) to the centre_buffer.
+  // (reason: the blur will produce border of width BLUR_WIDTH-2, the last column sent to blur is also directly displayed)
+
+  // From in buffer, move centre to centre buffer.
+  // Move left edge to ip input buffer, start ip write.
+  // Wait until ip read is done, move edge_ip_output buffer result to an edge_result buffer in row major order in u8 format.
+  // Write RIGHT edge to edge buffer, begin ip read.
+
+	// edge_ip_input_buffer_left and edge_ip_input_buffer_right are in column major order.
+	// They are in SAME array, but different parts of the array.
+
+  /*
+  (here, the IP dma is already in reading and writing mode, to a target edge_result buffer already)
+  1. Put centre to where we want.
+  2. If not first, put left to the edge_buffer. AND START AXI WRITE.
+  2.5: wait until IP DMA read is done.
+  2.75: move edge_result_buffer's result to some memory location, change format from u32 to u8
+  3. if not last, put right to the edge_buffer.
+  4. Start IP DMA read
+  */
+
+  // 1. Put centre to where we want.
+  int in_i = (1920 + START_COLUMN_INDEX + BLUR_WIDTH - 1) * 3; // starting at the center on the second line for current frame
+  int full_i = (FINAL_WIDTH + current_image_index * (CENTRE_WIDTH + EDGE_WIDTH)) * 3; // starting at the center on the second line for current frame in full frame
+  for (int r = 1; r < 479; r++) {
+    for(int c = START_COLUMN_INDEX + BLUR_WIDTH - 1; c < END_COLUMN_INDEX - BLUR_WIDTH + 1; c++){
+	  full_image_buffer[full_i] = in_buffer[in_i];
+	  full_image_buffer[full_i+1] = in_buffer[in_i+1];
+	  full_image_buffer[full_i+2] = in_buffer[in_i+2];
+	  full_i += 3;
+	  in_i += 3;
+	}
+	// move to next line same position then back CENTRE_WIDTH
+	full_i += (FINAL_WIDTH - CENTRE_WIDTH) * 3;
+	in_i += (1920 - CENTRE_WIDTH) * 3;
+  }
+
+  // 2. If not first, put left to the edge_buffer. AND START AXI WRITE.
+  if(!is_first){
+    // Move left edge to the edge_ip_input_buffer, in column major order.
+    int out_index = 0;
+    for (int col = START_COLUMN_INDEX; col < START_COLUMN_INDEX + BLUR_WIDTH; col++){
+      for(int row = 0; row < 480; row++){
+        int in_index = row * 1920 * 3 + col * 3;
+        edge_ip_input_buffer_right[out_index] = ((in_buffer[in_index] << 24) | (in_buffer[in_index+1] << 16) | in_buffer[in_index+2] << 8) & 0xFFFFFF00;
+        out_index++;
+      }
+    }
+    // Start IP DMA write
+		image_processor_begin_write();
+
+    // Wait until IP DMA write and read is done.
+		image_processor_wait_until_done();
+
+	out_index = (FINAL_WIDTH + CENTRE_WIDTH + (current_image_index - 1) * (EDGE_WIDTH + CENTRE_WIDTH)) * 3; // edge starting location in full frame
+	for (int row = 0; row < 478; row++) {
+	  int in_index = row;
+	  for (int col = 0; col < BLUR_WIDTH * 2 - 2; col++) {
+		// edge ip out buf: edge width * 478
+		// full: 478 * edge width
+		full_image_buffer[out_index] = (edge_ip_output_buffer[in_index] >> 24) & 0xFF;
+		full_image_buffer[out_index+1] = (edge_ip_output_buffer[in_index] >> 16) & 0xFF;
+		full_image_buffer[out_index+2] = (edge_ip_output_buffer[in_index] >> 8) & 0xFF;
+		out_index += 3;
+		in_index +=  478;
+	  }
+	  out_index += (FINAL_WIDTH - EDGE_WIDTH) * 3;
+	}
+  }
+
+  // 3. If not last, put right to the edge_buffer.
+  if(!is_last){
+    // Move right edge to the edge_ip_input_buffer, in column major order.
+    int out_index = 0;
+    for (int col = END_COLUMN_INDEX - BLUR_WIDTH; col < END_COLUMN_INDEX; col++){
+      for(int row = 0; row < 480; row++){
+        int in_index = row * 1920 * 3 + col * 3;
+        edge_ip_input_buffer_left[out_index] = ((in_buffer[in_index] << 24) | (in_buffer[in_index+1] << 16) | in_buffer[in_index+2] << 8) & 0xFFFFFF00;
+        out_index++;
+      }
+    }
+
+    // Start IP DMA read
+		image_processor_begin_read();
+  }
+
+
+}
+
+void convert_centres_and_edges_to_row_major(u8** centre_buffers_pointers, u8** edge_buffers_pointers, u8** full_image_buffer){
+  // input format: a list of pointers to all centre buffers, and a list of pointers to all edge buffers.
+  // Assuming NUM_IMAGES of center and NUM_IMAGES+1 of edge, first and last edge only half used.
+  // center: continuous CENTER_WIDTH*480*3 bytes, edge: 2 continuous (BLUR_WIDTH)*480*3 bytes ith right then i+1th left.
+  // output format: assuming the output is row major order, one image after another, each of size (center_width + 2*blur_width)*480*3.
+  for(int i = 0; i < NUM_IMAGES; i++) {
+	// Convert the centre buffer to row major order.
+	int out_index = 0;
+	int center_index = 0;
+	int edge_column_offset = 0;
+	for (int row = 0; row < 480; row++){
+	  edge_column_offset += 3;
+	  int edge_right = edge_column_offset;
+	  int edge_left = edge_column_offset + 3 * 480 * BLUR_WIDTH;
+	  for(int col = 0; col < 2*BLUR_WIDTH + END_COLUMN_INDEX - START_COLUMN_INDEX; col++){
+		if (col < BLUR_WIDTH) { // left col major edge
+			full_image_buffer[i][out_index] = edge_buffers_pointers[i][edge_left];
+			full_image_buffer[i][out_index+1] = edge_buffers_pointers[i][edge_left+1];
+			full_image_buffer[i][out_index+2] = edge_buffers_pointers[i][edge_left+2];
+			edge_left += 3 * 480;
+		}else if(col >= BLUR_WIDTH + END_COLUMN_INDEX - START_COLUMN_INDEX){ // right col major edge
+			full_image_buffer[i][out_index] = edge_buffers_pointers[i+1][edge_right];
+			full_image_buffer[i][out_index+1] = edge_buffers_pointers[i+1][edge_right+1];
+			full_image_buffer[i][out_index+2] = edge_buffers_pointers[i+1][edge_right+2];
+			edge_right += 3 * 480;
+		}else{ // row major center
+			full_image_buffer[i][out_index] = centre_buffers_pointers[i][center_index];
+			full_image_buffer[i][out_index+1] = centre_buffers_pointers[i][center_index+1];
+			full_image_buffer[i][out_index+2] = centre_buffers_pointers[i][center_index+2];
+			center_index += 3;
+		}
+		out_index += 3;
+	  }
+	}
+
+	// Convert the edge buffer to row major order.
+	out_index = 0;
+	for (int row = 0; row < 480; row++){
+	  for(int col = 0; col < 2*BLUR_WIDTH - 2; col++){
+		int in_index = row * (2*BLUR_WIDTH - 2) + col;
+		full_image_buffer[i][out_index] = edge_buffers_pointers[i][in_index];
+		full_image_buffer[i][out_index+1] = edge_buffers_pointers[i][in_index+1];
+		full_image_buffer[i][out_index+2] = edge_buffers_pointers[i][in_index+2];
+		out_index += 3;
+	  }
+	}
+  }
+}
+
+void display_image_from_start_col(u8* image_buffer, u8* frame_buffer, int begin_col, int total_width){ //UPDATE: added total_width
+  // Move image from a full row-major order image buffer to the frame buffer, starting from the begin_col. (don't need to error check if begin_col + 640 > total image length, some other function should handle that)
+
+	int height = 480;
+	int width = 640;
+
+	int frame_pixel = 0;
+	int current_col_pixel = begin_col*3;
+	int current_line_pixel = 0;
+	// avoid using multiplication in the loop.
+
+
+	for(int row = 0; row < height; row++){
+		for(int col = begin_col; col < begin_col + width; col++){
+            u32 current_pixel = current_col_pixel + current_line_pixel;
+
+            if (row == 0 || row == height - 1) {
+                // Add black pixels for the first and last rows
+                frame_buffer[frame_pixel] = 0x00;
+                frame_buffer[frame_pixel + 1] = 0x00;
+                frame_buffer[frame_pixel + 2] = 0x00;
+            } else {
+                frame_buffer[frame_pixel] = image_buffer[current_pixel];
+                frame_buffer[frame_pixel + 1] = image_buffer[current_pixel + 1];
+                frame_buffer[frame_pixel + 2] = image_buffer[current_pixel + 2];
+            }
+
+			// Move to the next pixel.
+			frame_pixel += 3;
+			current_col_pixel += 3;
+		}
+
+		// Move to the next row, reset the column pixel.
+		current_col_pixel = begin_col*3;
+		current_line_pixel += total_width*3; // TODO: check if this is correct.
+	}
+}
+
+int compute_new_begin_col(int current_col, int direction, int max_col){
+  // Compute the new begin column based on the current column and the direction.
+  // If direction is 1, move right, if direction is -1, move left.
+  // If the new column is out of bounds, keep it at the max or min value.
+  // max_col is the maximum column value. (the ENDING column value cannot be >= to this. )
+
+  // TODO: test and find a good shift size.
+  int shift_size = 10; // How many pixels to shift.
+
+  if(direction == 1){
+	// Move right
+	int new_col = current_col + shift_size;
+
+	// If the new column is out of bounds, keep it at the max value.
+	if(new_col >= max_col-640){
+	  return max_col - 640;
+	}
+	return new_col;
+  } else if(direction == -1){
+	// Move left
+	int new_col = current_col - shift_size;
+	if(new_col < 0){
+	  return 0;
+	}
+	return new_col;
+  }
+}
+
+
+// #############################################################################################
+// ################################# IP DMA Function ###########################################
+// #############################################################################################
+
+void image_processor_dma_init(){
+	XAxiDma_Config *Config;
+	int Status;
+
+	// Initialize
+	Config = XAxiDma_LookupConfig(XPAR_AXIDMA_0_DEVICE_ID);
+	if (!Config) {
+		xil_printf("No video DMA found for ID %d\r\n", XPAR_AXIDMA_0_DEVICE_ID);
+		return;
+	}
+	Status = XAxiDma_CfgInitialize(&AxiDma, Config);
+	if (Status != XST_SUCCESS) {
+		xil_printf("DMA Configuration Initialization failed %d\r\n", Status);
+		return;
+	}
+
+	// Disable the DMA interrupts
+	XAxiDma_IntrDisable(&AxiDma, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DEVICE_TO_DMA);
+	XAxiDma_IntrDisable(&AxiDma, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DMA_TO_DEVICE);
+}
+
+int image_processor_begin_write(){
+	// Begin a write transfer to the IP. The data should already be in image_processor_input_buffer
+	// Flush cache:
+	int transfer_bytes = IMAGE_PROCESSOR_INPUT_BUFFER_SIZE * 4; // 4 bytes per pixel
+	Xil_DCacheFlushRange((unsigned int) image_processor_input_buffer, transfer_bytes);
+	int Status = XAxiDma_SimpleTransfer(&AxiDma, (u32) image_processor_input_buffer, transfer_bytes, XAXIDMA_DMA_TO_DEVICE);
+	if (Status != XST_SUCCESS) {
+		xil_printf("DMA write failed %d\r\n", Status);
+		return XST_FAILURE;
+	}
+	return XST_SUCCESS;
+}
+
+int image_processor_begin_read(){
+	// Begin a read transfer from the IP. The data should be written to image_processor_output_buffer
+	int transfer_bytes = IMAGE_PROCESSOR_OUTPUT_BUFFER_SIZE * 4; // 4 bytes per pixel
+	int Status = XAxiDma_SimpleTransfer(&AxiDma, (u32) image_processor_output_buffer, transfer_bytes, XAXIDMA_DEVICE_TO_DMA);
+	if (Status != XST_SUCCESS) {
+		xil_printf("DMA read failed %d\r\n", Status);
+		return XST_FAILURE;
+	}
+	return XST_SUCCESS;
+}
+
+int image_processor_wait_until_done(){
+	// Wait until the DMA transfer is done.
+	while (XAxiDma_Busy(&AxiDma, XAXIDMA_DMA_TO_DEVICE) || XAxiDma_Busy(&AxiDma, XAXIDMA_DEVICE_TO_DMA)) {
+		// Wait
+	}
+	return XST_SUCCESS;
+}
+
+// #############################################################################################
+// ################################# Gyro Function #############################################
+// #############################################################################################
+void GyroInitialize() {
+  GYRO_begin(&gyroDevice, XPAR_PMODGYRO_0_AXI_LITE_SPI_BASEADDR, XPAR_PMODGYRO_0_AXI_LITE_GPIO_BASEADDR);
+
+  // Set Threshold Registers
+  GYRO_setThsXH(&gyroDevice, 0x0F);
+  GYRO_setThsYH(&gyroDevice, 0x0F);
+  GYRO_setThsZH(&gyroDevice, 0x0F);
+
+  GYRO_enableInt1(&gyroDevice, GYRO_INT1_XHIE);    // Threshold interrupt
+  GYRO_enableInt2(&gyroDevice, GYRO_REG3_I2_DRDY); // Data Rdy/FIFO interrupt
+}
+#define THRESHOLD 300
+int delta_angle() {
+	int16_t zAxis = 0;
+	while (GYRO_Int2Status(&gyroDevice) == 0);
+	zAxis = GYRO_getZ(&gyroDevice);
+	int z = (int) zAxis;
+	z = (z > THRESHOLD || z < -THRESHOLD) ? z : 0;
+	return z;
+} // Reads from gyro and compute the "delta angle" since last call.
+/* ------------------------------------------------------------ */
+/*				Procedure Definitions							*/
+/* ------------------------------------------------------------ */
+
+int main(void)
+{
+	Xil_ICacheEnable();
+	Xil_DCacheEnable();
+
+	HDMIInitialize();
+	camera_dma_init();
+	image_processor_dma_init();
+	GyroInitialize();
+
+	// config the camera
+	camera_config();
+
+	int status;
+	status = XGpio_Initialize(&BTNInst, XPAR_GPIO_0_DEVICE_ID); // Replace with your actual GPIO ID
+	if (status != XST_SUCCESS) {
+	    xil_printf("GPIO initialization failed!\r\n");
+	    return XST_FAILURE;
+	}
+
+	XGpio_SetDataDirection(&BTNInst, 1, 0xFF);
+
+	u8* frame = dispCtrl.framePtr[dispCtrl.curFrame];
+
+	// Define IP buffers.
+	image_processor_input_buffer = (u32*) malloc(IMAGE_PROCESSOR_INPUT_BUFFER_SIZE * 4); // 4 bytes per pixel
+	image_processor_output_buffer = (u32*) malloc(IMAGE_PROCESSOR_OUTPUT_BUFFER_SIZE * 4); // 4 bytes per pixel
+
+	// Define the "left edge input" and "right edge input" of the image_processor_input_buffer.
+	u32* edge_ip_input_buffer_left = image_processor_input_buffer;
+	u32* edge_ip_input_buffer_right = image_processor_input_buffer + 480 * BLUR_WIDTH;
+
+	// Define the final output buffer.
+	u8* full_image_buffer = (u8*) malloc(FINAL_WIDTH * 480 * 3); // use 480 for easy hdmi dma
+
+	// GPIO buttons
+	int reset_button_state = 0;
+	int left_button_state = 0;
+	int right_button_state = 0;
+
+	// Image index and angle
+	int current_image_index = 0;
+	int previous_angle = 0;
+	int current_angle = 0;
+	int display_col_index = 0;
+
+	// Status variables
+	int started = 0;
+
+	int max_col = (NUM_IMAGES * (CENTRE_WIDTH) + (NUM_IMAGES-1) * (2 * BLUR_WIDTH - 2));
+	int angle_difference_threshold = 360 / NUM_IMAGES; // TODO: should be the FOV covered by the centre of the camera.
+
+	while (1) {
+		// Read the reset button. If it changed and is now pressed, reset everything
+		int current_button_state = XGpio_DiscreteRead(&BTNInst, 1); // TODO: choose the correct button
+		if (current_button_state != reset_button_state && current_button_state == 1) { // Rising edge detection
+			// Reset everything
+			current_image_index = 0;
+			started = 1; // indicate that we have started
+			previous_angle = 0;
+			current_angle = 0;
+			display_col_index = 0;
+			left_button_state = 0;
+			right_button_state = 0;
+			camera_dma_init(); // Make sure the camera is running
+			// add a small delay to avoid camera read immediately after reset.
+			usleep(1000000); // 1 s delay
+		}
+		reset_button_state = current_button_state;
+
+		if (current_image_index == NUM_IMAGES) {
+			// We have processed all images, display the entire image, while checking for left or right button presses.
+			// Check left button press
+			int current_left_button_state = XGpio_DiscreteRead(&BTNInst, 1); // TODO: choose the correct button
+			if (current_left_button_state != left_button_state && current_left_button_state == 1) {
+				// Move left
+				display_col_index = compute_new_begin_col(display_col_index, -1, max_col);
+			}
+			left_button_state = current_left_button_state;
+
+			// Check right button press
+			int current_right_button_state = XGpio_DiscreteRead(&BTNInst, 1); // TODO: choose the correct button
+			if (current_right_button_state != right_button_state && current_right_button_state == 1) {
+				// Move right
+				display_col_index = compute_new_begin_col(display_col_index, 1, max_col);
+			}
+			right_button_state = current_right_button_state;
+
+			// Display the image
+			display_image_from_start_col(full_image_buffer, frame, display_col_index, max_col);
+		} else if (current_image_index == 0) {
+			// Pause camera
+			camera_dma_stop();
+			// Process the image
+			store_image_to_buffer_and_ip_buffer(frame, edge_ip_input_buffer_left, edge_ip_input_buffer_right, image_processor_output_buffer, current_image_index, full_image_buffer);
+			current_image_index++;
+			// Resume camera
+			camera_dma_init();
+		} else {
+			// Not all images are collected yet, continue processing images.
+
+			// Update angle
+			// TODO:
+			current_angle += delta_angle();
+
+			// If angle has changed enough, process the next image.
+			if (current_angle - previous_angle > angle_difference_threshold) {
+				// Process the next image
+				// Pause camera
+				camera_dma_stop();
+				// Process the image
+				store_image_to_buffer_and_ip_buffer(frame, edge_ip_input_buffer_left, edge_ip_input_buffer_right, image_processor_output_buffer, current_image_index, full_image_buffer);
+				current_image_index++;
+				previous_angle = current_angle;
+				if (current_image_index == NUM_IMAGES) {
+					// Convert the images to row major order.
+					// convert_centres_and_edges_to_row_major(centre_buffers, edge_result_buffers, full_image_buffer);
+					// Don't resume camera, we are done processing images.
+				} else {
+					// Resume camera
+					camera_dma_init();
+				}
+			}
+
+		}
+	}
+
+	GYRO_end(&gyroDevice);
+	return 0;
+}

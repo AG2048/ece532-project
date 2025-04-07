@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<item value="top_hw_platform_0" key="programfpga.hwplatform"/>
+	<item value="top.bit" key="top_hw_platform_0-bitFile"/>
+	<item value="false" key="top_hw_platform_0-partial_bit"/>
+	<item value="top.mmi" key="top_hw_platform_0-bmmFile"/>
+	<item value="bootloop" key="top_hw_platform_0-microblaze_0-initElf"/>
+	<item value="Local" key="top_hw_platform_0-target"/>
+	<item value="Auto Detect" key="top_hw_platform_0-device"/>
+</section>

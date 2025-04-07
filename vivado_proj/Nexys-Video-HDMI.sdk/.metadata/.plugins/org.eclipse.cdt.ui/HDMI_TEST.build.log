@@ -1,0 +1,51 @@
+23:42:30 **** Auto Build of configuration Debug for project HDMI_TEST ****
+make all 
+'Building file: ../src/video_demo.c'
+'Invoking: MicroBlaze gcc compiler'
+mb-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/video_demo.o" -I../../HDMI_TEST_bsp/microblaze_0/include -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v11.0 -mno-xl-soft-mul -mxl-multiply-high -mhard-float -mxl-float-convert -mxl-float-sqrt -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -MF"src/video_demo.d" -MT"src/video_demo.o" -o "src/video_demo.o" "../src/video_demo.c"
+../src/video_demo.c: In function 'ov7670_write_reg':
+../src/video_demo.c:306:27: warning: passing argument 1 of 'XIic_IsIicBusy' makes pointer from integer without a cast [-Wint-conversion]
+     while (XIic_IsIicBusy(IicInstance.BaseAddress));
+                           ^~~~~~~~~~~
+In file included from ../src/video_demo.c:44:0:
+../../HDMI_TEST_bsp/microblaze_0/include/xiic.h:511:19: note: expected 'XIic * {aka struct <anonymous> *}' but argument is of type 'UINTPTR {aka unsigned int}'
+ static inline u32 XIic_IsIicBusy(XIic *InstancePtr)
+                   ^~~~~~~~~~~~~~
+../src/video_demo.c: In function 'camera_dma_stop':
+../src/video_demo.c:409:6: warning: variable 'Status' set but not used [-Wunused-but-set-variable]
+  int Status;
+      ^~~~~~
+../src/video_demo.c: In function 'store_image_to_buffer_and_ip_buffer':
+../src/video_demo.c:585:3: warning: implicit declaration of function 'image_processor_begin_write' [-Wimplicit-function-declaration]
+   image_processor_begin_write();
+   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+../src/video_demo.c:588:3: warning: implicit declaration of function 'image_processor_wait_until_done' [-Wimplicit-function-declaration]
+   image_processor_wait_until_done();
+   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../src/video_demo.c:619:3: warning: implicit declaration of function 'image_processor_begin_read' [-Wimplicit-function-declaration]
+   image_processor_begin_read();
+   ^~~~~~~~~~~~~~~~~~~~~~~~~~
+../src/video_demo.c: In function 'main':
+../src/video_demo.c:872:6: warning: variable 'started' set but not used [-Wunused-but-set-variable]
+  int started = 0;
+      ^~~~~~~
+../src/video_demo.c: In function 'compute_new_begin_col':
+../src/video_demo.c:738:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+'Finished building: ../src/video_demo.c'
+' '
+'Building target: HDMI_TEST.elf'
+'Invoking: MicroBlaze gcc linker'
+mb-gcc -Wl,-T -Wl,../src/lscript.ld -L../../HDMI_TEST_bsp/microblaze_0/lib -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v11.0 -mno-xl-soft-mul -mxl-multiply-high -mhard-float -mxl-float-convert -mxl-float-sqrt -Wl,--no-relax -Wl,--gc-sections -o "HDMI_TEST.elf"  ./src/video_capture/video_capture.o  ./src/timer_ps/timer_ps.o  ./src/intc/intc.o  ./src/dynclk/dynclk.o  ./src/display_ctrl/display_ctrl.o  ./src/PmodGYRO.o ./src/video_demo.o ./src/xspi.o ./src/xspi_options.o   -Wl,--start-group,-lxil,-lgcc,-lc,--end-group
+'Finished building target: HDMI_TEST.elf'
+' '
+'Invoking: MicroBlaze Print Size'
+mb-size HDMI_TEST.elf  |tee "HDMI_TEST.elf.size"
+   text	   data	    bss	    dec	    hex	filename
+  45796	   2208	18798860	18846864	11f9490	HDMI_TEST.elf
+'Finished building: HDMI_TEST.elf.size'
+' '
+
+23:42:31 Build Finished (took 519ms)
+

@@ -1,0 +1,16 @@
+// Mem file initialization records.
+//
+// SW Build 2405991 on Thu Dec  6 23:38:27 MST 2018
+// Vivado v2018.3 (64-bit)
+// Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+// Created on Monday March 17, 2025 - 09:42:56 am, from:
+//
+//     Map file     - C:\Users\Robert\ECE532_HDMI2\vivado_proj\Nexys-Video-HDMI.srcs\sources_1\bd\hdmi\hdmi.bmm
+//     Data file(s) - c:/Users/Robert/ECE532_HDMI2/vivado_proj/Nexys-Video-HDMI.srcs/sources_1/bd/hdmi/ip/hdmi_microblaze_0_0/data/mb_bootloop_le.elf
+//
+// Address space 'hdi_top_hdmi_i_microblaze_0.hdi_top_hdmi_i_microblaze_0_local_memory_lmb_bram_ADDR_SPACE', bit lane [31:0].
+//
+// Bus width = 32 bits, number of bus blocks = 1.
+
+@00000000
+    B8000000
